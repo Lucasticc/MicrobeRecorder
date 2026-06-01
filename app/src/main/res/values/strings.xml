@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">微生物实验记录</string>
+    <string name="add_record">新建记录</string>
+    <string name="history">历史记录</string>
+    <string name="export_excel">导出 Excel</string>
+    <string name="export_word">导出 Word</string>
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="search_hint">搜索实验编号或样品名称...</string>
+    <string name="no_records">暂无实验记录</string>
+    <string name="no_records_hint">点击\"新建记录\"开始记录实验</string>
+    <string name="voice_input">语音输入</string>
+    <string name="start_voice">开始语音输入</string>
+    <string name="stop_voice">停止语音输入</string>
+    <string name="take_photo">拍照</string>
+    <string name="start_recording">开始录音</string>
+    <string name="stop_recording">停止录音</string>
+    <string name="play_audio">播放录音</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_failed">导出失败</string>
+    <string name="save_success">保存成功</string>
+    <string name="save_failed">保存失败</string>
+    <string name="delete_confirm">确定要删除这条记录吗？</string>
+    <string name="delete_success">删除成功</string>
+    <string name="delete_failed">删除失败</string>
+    <string name="permission_camera">需要相机权限才能拍照</string>
+    <string name="permission_audio">需要录音权限才能录音</string>
+    <string name="permission_storage">需要存储权限才能导出文件</string>
+    <string name="speech_not_available">设备不支持语音识别</string>
+    <string name="speech_error">语音识别出错</string>
+    <string name="recording">录音中...</string>
+    <string name="voice_listening">正在聆听...</string>
+</resources>
