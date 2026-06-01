@@ -64,6 +64,16 @@
             android:name=".SampleManageActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".TreatmentGroupManageActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ImageViewerActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.MicrobeRecorder" />
+
         <!-- FileProvider for camera -->
         <provider
             android:name="androidx.core.content.FileProvider"

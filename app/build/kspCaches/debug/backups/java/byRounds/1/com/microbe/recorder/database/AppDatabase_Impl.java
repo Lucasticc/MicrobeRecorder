@@ -30,22 +30,26 @@ public final class AppDatabase_Impl extends AppDatabase {
 
   private volatile SampleTypeDao _sampleTypeDao;
 
+  private volatile TreatmentGroupDao _treatmentGroupDao;
+
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(3) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS `microbe_records` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `experimentNumber` TEXT NOT NULL, `sampleName` TEXT NOT NULL, `cultureTime` TEXT NOT NULL, `observationResult` TEXT NOT NULL, `notes` TEXT NOT NULL, `description` TEXT NOT NULL, `photoPaths` TEXT NOT NULL, `audioPath` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `microbe_records` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `plantingDate` TEXT NOT NULL, `treatmentGroup` TEXT NOT NULL, `observationResult` TEXT NOT NULL, `notes` TEXT NOT NULL, `photoPaths` TEXT NOT NULL, `audioPath` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `sample_types` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `category` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `treatment_groups` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `plantingDate` TEXT NOT NULL, `description` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '448ce6f4bdf4f2056960e69626a07ff0')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d766f23bb4ccd9e0bf177c0f0a08e64')");
       }
 
       @Override
       public void dropAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS `microbe_records`");
         db.execSQL("DROP TABLE IF EXISTS `sample_types`");
+        db.execSQL("DROP TABLE IF EXISTS `treatment_groups`");
         final List<? extends RoomDatabase.Callback> _callbacks = mCallbacks;
         if (_callbacks != null) {
           for (RoomDatabase.Callback _callback : _callbacks) {
@@ -89,14 +93,12 @@ public final class AppDatabase_Impl extends AppDatabase {
       @NonNull
       public RoomOpenHelper.ValidationResult onValidateSchema(
           @NonNull final SupportSQLiteDatabase db) {
-        final HashMap<String, TableInfo.Column> _columnsMicrobeRecords = new HashMap<String, TableInfo.Column>(11);
+        final HashMap<String, TableInfo.Column> _columnsMicrobeRecords = new HashMap<String, TableInfo.Column>(9);
         _columnsMicrobeRecords.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsMicrobeRecords.put("experimentNumber", new TableInfo.Column("experimentNumber", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsMicrobeRecords.put("sampleName", new TableInfo.Column("sampleName", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsMicrobeRecords.put("cultureTime", new TableInfo.Column("cultureTime", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMicrobeRecords.put("plantingDate", new TableInfo.Column("plantingDate", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsMicrobeRecords.put("treatmentGroup", new TableInfo.Column("treatmentGroup", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMicrobeRecords.put("observationResult", new TableInfo.Column("observationResult", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMicrobeRecords.put("notes", new TableInfo.Column("notes", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
-        _columnsMicrobeRecords.put("description", new TableInfo.Column("description", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMicrobeRecords.put("photoPaths", new TableInfo.Column("photoPaths", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMicrobeRecords.put("audioPath", new TableInfo.Column("audioPath", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsMicrobeRecords.put("createdAt", new TableInfo.Column("createdAt", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -124,9 +126,24 @@ public final class AppDatabase_Impl extends AppDatabase {
                   + " Expected:\n" + _infoSampleTypes + "\n"
                   + " Found:\n" + _existingSampleTypes);
         }
+        final HashMap<String, TableInfo.Column> _columnsTreatmentGroups = new HashMap<String, TableInfo.Column>(5);
+        _columnsTreatmentGroups.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTreatmentGroups.put("name", new TableInfo.Column("name", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTreatmentGroups.put("plantingDate", new TableInfo.Column("plantingDate", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTreatmentGroups.put("description", new TableInfo.Column("description", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsTreatmentGroups.put("createdAt", new TableInfo.Column("createdAt", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        final HashSet<TableInfo.ForeignKey> _foreignKeysTreatmentGroups = new HashSet<TableInfo.ForeignKey>(0);
+        final HashSet<TableInfo.Index> _indicesTreatmentGroups = new HashSet<TableInfo.Index>(0);
+        final TableInfo _infoTreatmentGroups = new TableInfo("treatment_groups", _columnsTreatmentGroups, _foreignKeysTreatmentGroups, _indicesTreatmentGroups);
+        final TableInfo _existingTreatmentGroups = TableInfo.read(db, "treatment_groups");
+        if (!_infoTreatmentGroups.equals(_existingTreatmentGroups)) {
+          return new RoomOpenHelper.ValidationResult(false, "treatment_groups(com.microbe.recorder.database.TreatmentGroupEntity).\n"
+                  + " Expected:\n" + _infoTreatmentGroups + "\n"
+                  + " Found:\n" + _existingTreatmentGroups);
+        }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "448ce6f4bdf4f2056960e69626a07ff0", "0fd38b6e15f86e520203bf6016cfce9e");
+    }, "0d766f23bb4ccd9e0bf177c0f0a08e64", "08c16ded53c4a9b3180ebb788e47de57");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;
@@ -137,7 +154,7 @@ public final class AppDatabase_Impl extends AppDatabase {
   protected InvalidationTracker createInvalidationTracker() {
     final HashMap<String, String> _shadowTablesMap = new HashMap<String, String>(0);
     final HashMap<String, Set<String>> _viewTables = new HashMap<String, Set<String>>(0);
-    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "microbe_records","sample_types");
+    return new InvalidationTracker(this, _shadowTablesMap, _viewTables, "microbe_records","sample_types","treatment_groups");
   }
 
   @Override
@@ -148,6 +165,7 @@ public final class AppDatabase_Impl extends AppDatabase {
       super.beginTransaction();
       _db.execSQL("DELETE FROM `microbe_records`");
       _db.execSQL("DELETE FROM `sample_types`");
+      _db.execSQL("DELETE FROM `treatment_groups`");
       super.setTransactionSuccessful();
     } finally {
       super.endTransaction();
@@ -164,6 +182,7 @@ public final class AppDatabase_Impl extends AppDatabase {
     final HashMap<Class<?>, List<Class<?>>> _typeConvertersMap = new HashMap<Class<?>, List<Class<?>>>();
     _typeConvertersMap.put(RecordDao.class, RecordDao_Impl.getRequiredConverters());
     _typeConvertersMap.put(SampleTypeDao.class, SampleTypeDao_Impl.getRequiredConverters());
+    _typeConvertersMap.put(TreatmentGroupDao.class, TreatmentGroupDao_Impl.getRequiredConverters());
     return _typeConvertersMap;
   }
 
@@ -206,6 +225,20 @@ public final class AppDatabase_Impl extends AppDatabase {
           _sampleTypeDao = new SampleTypeDao_Impl(this);
         }
         return _sampleTypeDao;
+      }
+    }
+  }
+
+  @Override
+  public TreatmentGroupDao treatmentGroupDao() {
+    if (_treatmentGroupDao != null) {
+      return _treatmentGroupDao;
+    } else {
+      synchronized(this) {
+        if(_treatmentGroupDao == null) {
+          _treatmentGroupDao = new TreatmentGroupDao_Impl(this);
+        }
+        return _treatmentGroupDao;
       }
     }
   }

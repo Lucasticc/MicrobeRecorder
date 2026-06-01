@@ -1,155 +1,86 @@
-# 微生物实验记录 Android APP
+# 菌类实验记录 Android App
 
-一款专为实验室设计的微生物实验记录 Android 原生应用程序。
+专为菌类种植实验设计的 Android 原生应用，支持实验记录、照片拍摄、语音录入、数据导出。全部本地存储，无需联网。
 
-## ✨ 功能特性
+## 功能特性
 
-### 📝 实验记录
-- 完整的实验记录表单：实验编号、样品名称、培养时间、观察结果、备注
-- 自动生成实验编号
-- 支持语音输入实验描述
-
-### 📸 相机拍照
-- 拍摄实验样本照片
-- 照片预览和管理
-- 支持多张照片记录
-
-### 🎙️ 录音功能
-- 实验过程录音
-- 录音文件管理
-- 录音时长显示
-
-### 🗣️ 语音转文字
-- 语音输入自动转为文字
-- 支持中文语音识别
-- 实时显示识别结果
-
-### 💾 数据存储
-- 本地 SQLite 数据库存储
-- 所有数据完全本地化
-- 无需联网即可使用
-
-### 📊 数据导出
-- **一键导出 Excel 表格**：完整的实验记录表格
-- **一键导出 Word 文档**：详细的实验报告
-- 支持分享导出文件
-
-### 📋 历史记录
-- 历史记录列表查看
-- 关键词搜索功能
-- 记录详情查看
-
-## 🛠️ 技术栈
-
-- **开发语言**: Kotlin
-- **最低支持版本**: Android 7.0 (API 24)
-- **目标版本**: Android 14 (API 34)
-- **架构**: MVVM + Repository
-- **数据库**: Room (SQLite)
-- **UI框架**: Material Design 3
-- **异步处理**: Kotlin Coroutines
-- **图片加载**: Glide
-- **Excel导出**: Apache POI
-- **Word导出**: Apache POI
-
-## 📁 项目结构
-
-```
-MicrobeRecorder/
-├── app/src/main/
-│   ├── java/com/microbe/recorder/
-│   │   ├── MainActivity.kt              # 主界面
-│   │   ├── AddRecordActivity.kt         # 添加记录界面
-│   │   ├── RecordDetailActivity.kt      # 记录详情界面
-│   │   ├── HistoryActivity.kt           # 历史记录界面
-│   │   ├── adapter/
-│   │   │   ├── RecordAdapter.kt         # 记录列表适配器
-│   │   │   └── PhotoAdapter.kt          # 照片适配器
-│   │   ├── database/
-│   │   │   ├── AppDatabase.kt           # 数据库配置
-│   │   │   ├── RecordDao.kt             # 数据访问对象
-│   │   │   └── RecordEntity.kt          # 数据实体
-│   │   ├── model/
-│   │   │   └── MicrobeRecord.kt         # 数据模型
-│   │   └── util/
-│   │       ├── CameraHelper.kt          # 相机工具类
-│   │       ├── AudioRecorderHelper.kt   # 录音工具类
-│   │       ├── SpeechToTextHelper.kt    # 语音转文字工具类
-│   │       ├── ExcelExporter.kt         # Excel导出工具类
-│   │       ├── WordExporter.kt          # Word导出工具类
-│   │       └── FileHelper.kt            # 文件工具类
-│   ├── res/
-│   │   ├── layout/                      # 布局文件
-│   │   ├── values/                      # 资源文件
-│   │   ├── drawable/                    # 图片资源
-│   │   └── xml/                         # XML配置
-│   └── AndroidManifest.xml              # 应用清单
-├── build.gradle.kts                     # 项目构建配置
-└── README.md                            # 项目说明文档
-```
-
-## 🚀 快速开始
-
-### 环境要求
-- Android Studio Hedgehog (2023.1.1) 或更高版本
-- JDK 17
-- Android SDK 34
-
-### 安装步骤
-
-1. **克隆或下载项目**
-   ```bash
-   git clone <repository-url>
-   ```
-
-2. **使用 Android Studio 打开项目**
-   - 打开 Android Studio
-   - 选择 "Open an existing project"
-   - 导航到 MicrobeRecorder 目录并打开
-
-3. **等待 Gradle 同步**
-   - 首次打开时，Android Studio 会自动同步 Gradle 依赖
-   - 这可能需要几分钟时间
-
-4. **运行应用**
-   - 连接 Android 设备或启动模拟器
-   - 点击运行按钮
-
-## 📱 使用说明
+### 四栏导航
+1. **新建记录** — 首页统计 + 快速新建 + 最近记录
+2. **导出** — Excel/Word 导出，按种植日期+处理组筛选
+3. **历史记录** — 搜索 + 批量删除
+4. **实验管理** — 处理组管理（按种植日期分组）
 
 ### 新建实验记录
-1. 在主界面点击"新建记录"
-2. 填写实验编号、样品名称、培养时间等基本信息
-3. 描述观察结果
-4. 可选：拍照、录音、语音输入
-5. 点击"保存记录"
+- **种植日期**: 日期选择器
+- **处理组**: 下拉选择（从处理组管理加载）
+- **观察记录**: 多行文本 + 语音输入
+- **实验照片**: 拍照/相册，最多 5 张，自动归档
+- **录音**: 可选
+- **备注/调整**: 选填
+- **昨日参考**: 自动显示同组上次记录及照片缩略图
 
-### 查看历史记录
-1. 在主界面点击"历史记录"
-2. 使用搜索功能查找特定记录
-3. 点击记录查看详情
+### 照片管理
+- 拍照 + 从相册选择
+- 自动归档到: `images/种植日期_处理组_记录日期/`
+- 全屏预览，左右滑动切换
 
-### 导出数据
-1. 在主界面点击"导出 Excel"或"导出 Word"
-2. 系统会自动生成文件并弹出分享选项
-3. 选择保存位置或分享给他人
+### 数据导出
+- **Excel (.xlsx)**: 种植日期 | 记录日期 | 处理组 | 观察记录 | 照片1~5 | 备注
+- **Word (.doc)**: HTML 格式，图片内嵌
+- 支持按种植日期和处理组筛选
 
-## 🔑 权限说明
+### 语音识别
+自动适配国产手机: 三星(Bixby) / 魅族(Aicy) / 小米(小爱) / 华为(小艺)，通用兜底
 
-应用需要以下权限：
-- **相机权限**: 用于拍摄实验样本照片
-- **录音权限**: 用于录制实验过程音频
-- **存储权限**: 用于保存照片、录音和导出文件
-- **麦克风权限**: 用于语音识别功能
+### 历史记录
+- 搜索 + 批量选择 + 批量删除
+- 点击查看详情
 
-## 📄 许可证
+## 技术栈
+- Kotlin + Android Studio
+- Room (SQLite) 数据库
+- Apache POI (Excel 导出)
+- Glide (图片加载)
+- CameraX (相机)
+- Material Design 3
 
-MIT License
+## 数据库结构
 
-## 🤝 贡献
+### microbe_records
+| 字段 | 说明 |
+|------|------|
+| plantingDate | 种植日期 (yyyy-MM-dd) |
+| treatmentGroup | 处理组名称 |
+| observationResult | 观察记录 |
+| notes | 备注/调整 |
+| photoPaths | 照片路径（逗号分隔，最多5张） |
+| audioPath | 录音路径 |
+| createdAt | 创建时间 |
 
-欢迎提交 Issue 和 Pull Request！
+### treatment_groups
+| 字段 | 说明 |
+|------|------|
+| name | 处理组名称 |
+| plantingDate | 所属种植日期 |
 
-## 📞 联系方式
+## 文件存储
+```
+files/
+├── images/
+│   └── 2024-01-15_A组_2024-01-20/
+│       ├── CAMERA_20240120_103000.jpg
+│       └── PICK_20240120_103500.jpg
+├── audio/
+│   └── AUDIO_20240120_104000.m4a
+└── exports/
+    └── 菌类实验记录_20240120_150000.xlsx
+```
 
-如有问题或建议，请提交 Issue。
+## 构建
+1. Android Studio 打开项目
+2. Gradle JDK → Java 17
+3. 连接手机 → Run
+
+## 权限
+- 相机、录音、麦克风（语音识别）
+- 存储（导出文件）

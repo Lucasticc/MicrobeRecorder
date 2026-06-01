@@ -1,20 +1,20 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:68:9-76:20
+INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:78:9-86:20
 	android:grantUriPermissions
-		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:72:13-47
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:82:13-47
 	android:authorities
 		INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml
-		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:70:13-64
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:80:13-64
 	android:exported
-		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:71:13-37
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:81:13-37
 	android:name
-		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:69:13-62
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:79:13-62
 manifest
-ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-80:12
-INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-80:12
-INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-80:12
-INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-80:12
+ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-90:12
+INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-90:12
+INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-90:12
+INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:2:1-90:12
 MERGED from [androidx.databinding:viewbinding:8.1.0] C:\Users\m\.gradle\caches\transforms-3\725b2fcdd503452e52d07a804d5375ca\transformed\viewbinding-8.1.0\AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.android.material:material:1.10.0] C:\Users\m\.gradle\caches\transforms-3\c7973da93e2dc8e7e86d9058b87e60cc\transformed\material-1.10.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\m\.gradle\caches\transforms-3\bc4b265ffc65b04ee525d8d17c39b83d\transformed\constraintlayout-2.1.4\AndroidManifest.xml:2:1-11:12
@@ -131,8 +131,8 @@ ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:26:13-72
 	android:name
 		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:26:21-69
 application
-ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:30:5-78:19
-INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:30:5-78:19
+ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:30:5-88:19
+INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:30:5-88:19
 MERGED from [com.google.android.material:material:1.10.0] C:\Users\m\.gradle\caches\transforms-3\c7973da93e2dc8e7e86d9058b87e60cc\transformed\material-1.10.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.10.0] C:\Users\m\.gradle\caches\transforms-3\c7973da93e2dc8e7e86d9058b87e60cc\transformed\material-1.10.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\m\.gradle\caches\transforms-3\bc4b265ffc65b04ee525d8d17c39b83d\transformed\constraintlayout-2.1.4\AndroidManifest.xml:9:5-20
@@ -219,12 +219,28 @@ ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:63:9-65:40
 		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:65:13-37
 	android:name
 		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:64:13-49
-meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:73:13-75:54
-	android:resource
-		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:75:17-51
+activity#com.microbe.recorder.TreatmentGroupManageActivity
+ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:67:9-69:40
+	android:exported
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:69:13-37
 	android:name
-		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:74:17-67
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:68:13-57
+activity#com.microbe.recorder.ImageViewerActivity
+ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:71:9-75:60
+	android:exported
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:73:13-37
+	android:configChanges
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:74:13-59
+	android:theme
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:75:13-57
+	android:name
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:72:13-48
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:83:13-85:54
+	android:resource
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:85:17-51
+	android:name
+		ADDED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:84:17-67
 uses-sdk
 INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\MicrobeRecorder\app\src\main\AndroidManifest.xml

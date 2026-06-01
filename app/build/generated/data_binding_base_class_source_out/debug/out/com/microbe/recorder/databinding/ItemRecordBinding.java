@@ -4,6 +4,7 @@ package com.microbe.recorder.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +19,9 @@ import java.lang.String;
 public final class ItemRecordBinding implements ViewBinding {
   @NonNull
   private final MaterialCardView rootView;
+
+  @NonNull
+  public final CheckBox cbSelect;
 
   @NonNull
   public final TextView chipCultureTime;
@@ -40,11 +44,12 @@ public final class ItemRecordBinding implements ViewBinding {
   @NonNull
   public final TextView tvSampleName;
 
-  private ItemRecordBinding(@NonNull MaterialCardView rootView, @NonNull TextView chipCultureTime,
-      @NonNull TextView ivAudioIcon, @NonNull TextView ivPhotoIcon, @NonNull TextView tvDate,
-      @NonNull TextView tvExperimentNumber, @NonNull TextView tvObservationPreview,
-      @NonNull TextView tvSampleName) {
+  private ItemRecordBinding(@NonNull MaterialCardView rootView, @NonNull CheckBox cbSelect,
+      @NonNull TextView chipCultureTime, @NonNull TextView ivAudioIcon,
+      @NonNull TextView ivPhotoIcon, @NonNull TextView tvDate, @NonNull TextView tvExperimentNumber,
+      @NonNull TextView tvObservationPreview, @NonNull TextView tvSampleName) {
     this.rootView = rootView;
+    this.cbSelect = cbSelect;
     this.chipCultureTime = chipCultureTime;
     this.ivAudioIcon = ivAudioIcon;
     this.ivPhotoIcon = ivPhotoIcon;
@@ -81,6 +86,12 @@ public final class ItemRecordBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.cbSelect;
+      CheckBox cbSelect = ViewBindings.findChildViewById(rootView, id);
+      if (cbSelect == null) {
+        break missingId;
+      }
+
       id = R.id.chipCultureTime;
       TextView chipCultureTime = ViewBindings.findChildViewById(rootView, id);
       if (chipCultureTime == null) {
@@ -123,8 +134,8 @@ public final class ItemRecordBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemRecordBinding((MaterialCardView) rootView, chipCultureTime, ivAudioIcon,
-          ivPhotoIcon, tvDate, tvExperimentNumber, tvObservationPreview, tvSampleName);
+      return new ItemRecordBinding((MaterialCardView) rootView, cbSelect, chipCultureTime,
+          ivAudioIcon, ivPhotoIcon, tvDate, tvExperimentNumber, tvObservationPreview, tvSampleName);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

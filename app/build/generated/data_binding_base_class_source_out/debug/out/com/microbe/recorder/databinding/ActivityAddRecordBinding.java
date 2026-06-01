@@ -27,7 +27,10 @@ public final class ActivityAddRecordBinding implements ViewBinding {
   private final ConstraintLayout rootView;
 
   @NonNull
-  public final AutoCompleteTextView actvSampleName;
+  public final AutoCompleteTextView actvFilterDate;
+
+  @NonNull
+  public final AutoCompleteTextView actvTreatmentGroup;
 
   @NonNull
   public final MaterialButton btnPickImage;
@@ -45,19 +48,22 @@ public final class ActivityAddRecordBinding implements ViewBinding {
   public final MaterialButton btnVoiceInput;
 
   @NonNull
+  public final MaterialCardView cardFilterBar;
+
+  @NonNull
   public final MaterialCardView cardYesterdayRef;
 
   @NonNull
-  public final TextInputEditText etCultureTime;
-
-  @NonNull
-  public final TextInputEditText etDescription;
-
-  @NonNull
-  public final TextInputEditText etExperimentNumber;
+  public final TextInputEditText etCreationDate;
 
   @NonNull
   public final TextInputEditText etNotes;
+
+  @NonNull
+  public final TextInputEditText etObservation;
+
+  @NonNull
+  public final TextInputEditText etPlantingDate;
 
   @NonNull
   public final LinearLayout layoutRecording;
@@ -66,13 +72,19 @@ public final class ActivityAddRecordBinding implements ViewBinding {
   public final RecyclerView rvPhotos;
 
   @NonNull
+  public final RecyclerView rvYesterdayPhotos;
+
+  @NonNull
   public final MaterialToolbar toolbar;
 
   @NonNull
   public final TextView tvAudioInfo;
 
   @NonNull
-  public final TextView tvManageSamples;
+  public final TextView tvManageGroups;
+
+  @NonNull
+  public final TextView tvPhotoCount;
 
   @NonNull
   public final TextView tvRecordingTime;
@@ -81,42 +93,44 @@ public final class ActivityAddRecordBinding implements ViewBinding {
   public final TextView tvVoiceStatus;
 
   @NonNull
-  public final TextView tvYesterdayDate;
-
-  @NonNull
   public final TextView tvYesterdayRef;
 
   private ActivityAddRecordBinding(@NonNull ConstraintLayout rootView,
-      @NonNull AutoCompleteTextView actvSampleName, @NonNull MaterialButton btnPickImage,
+      @NonNull AutoCompleteTextView actvFilterDate,
+      @NonNull AutoCompleteTextView actvTreatmentGroup, @NonNull MaterialButton btnPickImage,
       @NonNull MaterialButton btnRecord, @NonNull MaterialButton btnSave,
       @NonNull MaterialButton btnTakePhoto, @NonNull MaterialButton btnVoiceInput,
-      @NonNull MaterialCardView cardYesterdayRef, @NonNull TextInputEditText etCultureTime,
-      @NonNull TextInputEditText etDescription, @NonNull TextInputEditText etExperimentNumber,
-      @NonNull TextInputEditText etNotes, @NonNull LinearLayout layoutRecording,
-      @NonNull RecyclerView rvPhotos, @NonNull MaterialToolbar toolbar,
-      @NonNull TextView tvAudioInfo, @NonNull TextView tvManageSamples,
-      @NonNull TextView tvRecordingTime, @NonNull TextView tvVoiceStatus,
-      @NonNull TextView tvYesterdayDate, @NonNull TextView tvYesterdayRef) {
+      @NonNull MaterialCardView cardFilterBar, @NonNull MaterialCardView cardYesterdayRef,
+      @NonNull TextInputEditText etCreationDate, @NonNull TextInputEditText etNotes,
+      @NonNull TextInputEditText etObservation, @NonNull TextInputEditText etPlantingDate,
+      @NonNull LinearLayout layoutRecording, @NonNull RecyclerView rvPhotos,
+      @NonNull RecyclerView rvYesterdayPhotos, @NonNull MaterialToolbar toolbar,
+      @NonNull TextView tvAudioInfo, @NonNull TextView tvManageGroups,
+      @NonNull TextView tvPhotoCount, @NonNull TextView tvRecordingTime,
+      @NonNull TextView tvVoiceStatus, @NonNull TextView tvYesterdayRef) {
     this.rootView = rootView;
-    this.actvSampleName = actvSampleName;
+    this.actvFilterDate = actvFilterDate;
+    this.actvTreatmentGroup = actvTreatmentGroup;
     this.btnPickImage = btnPickImage;
     this.btnRecord = btnRecord;
     this.btnSave = btnSave;
     this.btnTakePhoto = btnTakePhoto;
     this.btnVoiceInput = btnVoiceInput;
+    this.cardFilterBar = cardFilterBar;
     this.cardYesterdayRef = cardYesterdayRef;
-    this.etCultureTime = etCultureTime;
-    this.etDescription = etDescription;
-    this.etExperimentNumber = etExperimentNumber;
+    this.etCreationDate = etCreationDate;
     this.etNotes = etNotes;
+    this.etObservation = etObservation;
+    this.etPlantingDate = etPlantingDate;
     this.layoutRecording = layoutRecording;
     this.rvPhotos = rvPhotos;
+    this.rvYesterdayPhotos = rvYesterdayPhotos;
     this.toolbar = toolbar;
     this.tvAudioInfo = tvAudioInfo;
-    this.tvManageSamples = tvManageSamples;
+    this.tvManageGroups = tvManageGroups;
+    this.tvPhotoCount = tvPhotoCount;
     this.tvRecordingTime = tvRecordingTime;
     this.tvVoiceStatus = tvVoiceStatus;
-    this.tvYesterdayDate = tvYesterdayDate;
     this.tvYesterdayRef = tvYesterdayRef;
   }
 
@@ -147,9 +161,15 @@ public final class ActivityAddRecordBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.actvSampleName;
-      AutoCompleteTextView actvSampleName = ViewBindings.findChildViewById(rootView, id);
-      if (actvSampleName == null) {
+      id = R.id.actvFilterDate;
+      AutoCompleteTextView actvFilterDate = ViewBindings.findChildViewById(rootView, id);
+      if (actvFilterDate == null) {
+        break missingId;
+      }
+
+      id = R.id.actvTreatmentGroup;
+      AutoCompleteTextView actvTreatmentGroup = ViewBindings.findChildViewById(rootView, id);
+      if (actvTreatmentGroup == null) {
         break missingId;
       }
 
@@ -183,33 +203,39 @@ public final class ActivityAddRecordBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.cardFilterBar;
+      MaterialCardView cardFilterBar = ViewBindings.findChildViewById(rootView, id);
+      if (cardFilterBar == null) {
+        break missingId;
+      }
+
       id = R.id.cardYesterdayRef;
       MaterialCardView cardYesterdayRef = ViewBindings.findChildViewById(rootView, id);
       if (cardYesterdayRef == null) {
         break missingId;
       }
 
-      id = R.id.etCultureTime;
-      TextInputEditText etCultureTime = ViewBindings.findChildViewById(rootView, id);
-      if (etCultureTime == null) {
-        break missingId;
-      }
-
-      id = R.id.etDescription;
-      TextInputEditText etDescription = ViewBindings.findChildViewById(rootView, id);
-      if (etDescription == null) {
-        break missingId;
-      }
-
-      id = R.id.etExperimentNumber;
-      TextInputEditText etExperimentNumber = ViewBindings.findChildViewById(rootView, id);
-      if (etExperimentNumber == null) {
+      id = R.id.etCreationDate;
+      TextInputEditText etCreationDate = ViewBindings.findChildViewById(rootView, id);
+      if (etCreationDate == null) {
         break missingId;
       }
 
       id = R.id.etNotes;
       TextInputEditText etNotes = ViewBindings.findChildViewById(rootView, id);
       if (etNotes == null) {
+        break missingId;
+      }
+
+      id = R.id.etObservation;
+      TextInputEditText etObservation = ViewBindings.findChildViewById(rootView, id);
+      if (etObservation == null) {
+        break missingId;
+      }
+
+      id = R.id.etPlantingDate;
+      TextInputEditText etPlantingDate = ViewBindings.findChildViewById(rootView, id);
+      if (etPlantingDate == null) {
         break missingId;
       }
 
@@ -225,6 +251,12 @@ public final class ActivityAddRecordBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.rvYesterdayPhotos;
+      RecyclerView rvYesterdayPhotos = ViewBindings.findChildViewById(rootView, id);
+      if (rvYesterdayPhotos == null) {
+        break missingId;
+      }
+
       id = R.id.toolbar;
       MaterialToolbar toolbar = ViewBindings.findChildViewById(rootView, id);
       if (toolbar == null) {
@@ -237,9 +269,15 @@ public final class ActivityAddRecordBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.tvManageSamples;
-      TextView tvManageSamples = ViewBindings.findChildViewById(rootView, id);
-      if (tvManageSamples == null) {
+      id = R.id.tvManageGroups;
+      TextView tvManageGroups = ViewBindings.findChildViewById(rootView, id);
+      if (tvManageGroups == null) {
+        break missingId;
+      }
+
+      id = R.id.tvPhotoCount;
+      TextView tvPhotoCount = ViewBindings.findChildViewById(rootView, id);
+      if (tvPhotoCount == null) {
         break missingId;
       }
 
@@ -255,23 +293,17 @@ public final class ActivityAddRecordBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.tvYesterdayDate;
-      TextView tvYesterdayDate = ViewBindings.findChildViewById(rootView, id);
-      if (tvYesterdayDate == null) {
-        break missingId;
-      }
-
       id = R.id.tvYesterdayRef;
       TextView tvYesterdayRef = ViewBindings.findChildViewById(rootView, id);
       if (tvYesterdayRef == null) {
         break missingId;
       }
 
-      return new ActivityAddRecordBinding((ConstraintLayout) rootView, actvSampleName, btnPickImage,
-          btnRecord, btnSave, btnTakePhoto, btnVoiceInput, cardYesterdayRef, etCultureTime,
-          etDescription, etExperimentNumber, etNotes, layoutRecording, rvPhotos, toolbar,
-          tvAudioInfo, tvManageSamples, tvRecordingTime, tvVoiceStatus, tvYesterdayDate,
-          tvYesterdayRef);
+      return new ActivityAddRecordBinding((ConstraintLayout) rootView, actvFilterDate,
+          actvTreatmentGroup, btnPickImage, btnRecord, btnSave, btnTakePhoto, btnVoiceInput,
+          cardFilterBar, cardYesterdayRef, etCreationDate, etNotes, etObservation, etPlantingDate,
+          layoutRecording, rvPhotos, rvYesterdayPhotos, toolbar, tvAudioInfo, tvManageGroups,
+          tvPhotoCount, tvRecordingTime, tvVoiceStatus, tvYesterdayRef);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

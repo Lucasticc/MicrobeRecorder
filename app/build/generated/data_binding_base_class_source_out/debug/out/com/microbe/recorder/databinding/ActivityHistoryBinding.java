@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.microbe.recorder.R;
 import java.lang.NullPointerException;
@@ -24,6 +25,18 @@ import java.lang.String;
 public final class ActivityHistoryBinding implements ViewBinding {
   @NonNull
   private final ConstraintLayout rootView;
+
+  @NonNull
+  public final LinearLayout batchBar;
+
+  @NonNull
+  public final MaterialButton btnBatchDelete;
+
+  @NonNull
+  public final MaterialButton btnCancelSelect;
+
+  @NonNull
+  public final MaterialButton btnSelectAll;
 
   @NonNull
   public final LinearLayout emptyState;
@@ -41,24 +54,42 @@ public final class ActivityHistoryBinding implements ViewBinding {
   public final MaterialCardView searchCard;
 
   @NonNull
+  public final LinearLayout statsBar;
+
+  @NonNull
   public final MaterialToolbar toolbar;
 
   @NonNull
   public final TextView tvRecordCount;
 
-  private ActivityHistoryBinding(@NonNull ConstraintLayout rootView,
-      @NonNull LinearLayout emptyState, @NonNull EditText etSearch,
-      @NonNull ImageView ivClearSearch, @NonNull RecyclerView rvRecords,
-      @NonNull MaterialCardView searchCard, @NonNull MaterialToolbar toolbar,
-      @NonNull TextView tvRecordCount) {
+  @NonNull
+  public final TextView tvSelectCount;
+
+  @NonNull
+  public final TextView tvSelectMode;
+
+  private ActivityHistoryBinding(@NonNull ConstraintLayout rootView, @NonNull LinearLayout batchBar,
+      @NonNull MaterialButton btnBatchDelete, @NonNull MaterialButton btnCancelSelect,
+      @NonNull MaterialButton btnSelectAll, @NonNull LinearLayout emptyState,
+      @NonNull EditText etSearch, @NonNull ImageView ivClearSearch, @NonNull RecyclerView rvRecords,
+      @NonNull MaterialCardView searchCard, @NonNull LinearLayout statsBar,
+      @NonNull MaterialToolbar toolbar, @NonNull TextView tvRecordCount,
+      @NonNull TextView tvSelectCount, @NonNull TextView tvSelectMode) {
     this.rootView = rootView;
+    this.batchBar = batchBar;
+    this.btnBatchDelete = btnBatchDelete;
+    this.btnCancelSelect = btnCancelSelect;
+    this.btnSelectAll = btnSelectAll;
     this.emptyState = emptyState;
     this.etSearch = etSearch;
     this.ivClearSearch = ivClearSearch;
     this.rvRecords = rvRecords;
     this.searchCard = searchCard;
+    this.statsBar = statsBar;
     this.toolbar = toolbar;
     this.tvRecordCount = tvRecordCount;
+    this.tvSelectCount = tvSelectCount;
+    this.tvSelectMode = tvSelectMode;
   }
 
   @Override
@@ -88,6 +119,30 @@ public final class ActivityHistoryBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.batchBar;
+      LinearLayout batchBar = ViewBindings.findChildViewById(rootView, id);
+      if (batchBar == null) {
+        break missingId;
+      }
+
+      id = R.id.btnBatchDelete;
+      MaterialButton btnBatchDelete = ViewBindings.findChildViewById(rootView, id);
+      if (btnBatchDelete == null) {
+        break missingId;
+      }
+
+      id = R.id.btnCancelSelect;
+      MaterialButton btnCancelSelect = ViewBindings.findChildViewById(rootView, id);
+      if (btnCancelSelect == null) {
+        break missingId;
+      }
+
+      id = R.id.btnSelectAll;
+      MaterialButton btnSelectAll = ViewBindings.findChildViewById(rootView, id);
+      if (btnSelectAll == null) {
+        break missingId;
+      }
+
       id = R.id.emptyState;
       LinearLayout emptyState = ViewBindings.findChildViewById(rootView, id);
       if (emptyState == null) {
@@ -118,6 +173,12 @@ public final class ActivityHistoryBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.statsBar;
+      LinearLayout statsBar = ViewBindings.findChildViewById(rootView, id);
+      if (statsBar == null) {
+        break missingId;
+      }
+
       id = R.id.toolbar;
       MaterialToolbar toolbar = ViewBindings.findChildViewById(rootView, id);
       if (toolbar == null) {
@@ -130,8 +191,21 @@ public final class ActivityHistoryBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityHistoryBinding((ConstraintLayout) rootView, emptyState, etSearch,
-          ivClearSearch, rvRecords, searchCard, toolbar, tvRecordCount);
+      id = R.id.tvSelectCount;
+      TextView tvSelectCount = ViewBindings.findChildViewById(rootView, id);
+      if (tvSelectCount == null) {
+        break missingId;
+      }
+
+      id = R.id.tvSelectMode;
+      TextView tvSelectMode = ViewBindings.findChildViewById(rootView, id);
+      if (tvSelectMode == null) {
+        break missingId;
+      }
+
+      return new ActivityHistoryBinding((ConstraintLayout) rootView, batchBar, btnBatchDelete,
+          btnCancelSelect, btnSelectAll, emptyState, etSearch, ivClearSearch, rvRecords, searchCard,
+          statsBar, toolbar, tvRecordCount, tvSelectCount, tvSelectMode);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

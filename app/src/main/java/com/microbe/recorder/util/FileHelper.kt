@@ -17,7 +17,8 @@ object FileHelper {
      * 获取导出目录（与 file_paths.xml 中的 exports/ 对应）
      */
     fun getExportDir(context: Context): File {
-        val dir = File(context.getExternalFilesDir(null), "exports")
+        val base = context.getExternalFilesDir(null) ?: context.filesDir
+        val dir = File(base, "exports")
         if (!dir.exists()) {
             dir.mkdirs()
         }

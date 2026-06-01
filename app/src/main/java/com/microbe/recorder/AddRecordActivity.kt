@@ -1,6 +1,7 @@
 package com.microbe.recorder
 
 import android.Manifest
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -21,12 +22,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 import com.microbe.recorder.adapter.PhotoAdapter
 import com.microbe.recorder.database.AppDatabase
 import com.microbe.recorder.database.RecordEntity
-import com.microbe.recorder.database.SampleTypeEntity
+import com.microbe.recorder.database.TreatmentGroupEntity
 import com.microbe.recorder.util.AudioRecorderHelper
 import com.microbe.recorder.util.CameraHelper
 import com.microbe.recorder.util.FileHelper
@@ -45,131 +45,109 @@ class AddRecordActivity : AppCompatActivity() {
     private lateinit var photoAdapter: PhotoAdapter
     private lateinit var audioRecorderHelper: AudioRecorderHelper
 
-    // Views
-    private lateinit var etExperimentNumber: TextInputEditText
-    private lateinit var actvSampleName: AutoCompleteTextView
-    private lateinit var etCultureTime: TextInputEditText
-    private lateinit var etDescription: TextInputEditText
+    private lateinit var etPlantingDate: TextInputEditText
+    private lateinit var etCreationDate: TextInputEditText
+    private lateinit var actvTreatmentGroup: AutoCompleteTextView
+    private lateinit var actvFilterDate: AutoCompleteTextView
+    private lateinit var etObservation: TextInputEditText
     private lateinit var etNotes: TextInputEditText
     private lateinit var rvPhotos: RecyclerView
     private lateinit var btnVoiceInput: MaterialButton
     private lateinit var tvVoiceStatus: TextView
+    private lateinit var tvPhotoCount: TextView
     private lateinit var btnTakePhoto: MaterialButton
     private lateinit var btnRecord: MaterialButton
     private lateinit var layoutRecording: View
     private lateinit var tvRecordingTime: TextView
     private lateinit var tvAudioInfo: TextView
     private lateinit var btnSave: MaterialButton
-    private lateinit var cardYesterdayRef: MaterialCardView
+    private lateinit var cardYesterdayRef: View
     private lateinit var tvYesterdayRef: TextView
-    private lateinit var tvYesterdayDate: TextView
+    private lateinit var rvYesterdayPhotos: RecyclerView
 
-    // 状态
     private var isRecording = false
     private var currentAudioPath: String? = null
     private val photoPaths = mutableListOf<String>()
-
-    // 编辑模式
     private var editRecordId: Long = -1
     private var isEditMode = false
 
-    // 录音计时器
+    // 记录日期（可修改）
+    private var creationCalendar = Calendar.getInstance()
+
     private val handler = Handler(Looper.getMainLooper())
     private var recordingStartTime = 0L
     private val recordingTimerRunnable = object : Runnable {
         override fun run() {
             val elapsed = System.currentTimeMillis() - recordingStartTime
             val seconds = (elapsed / 1000).toInt()
-            val minutes = seconds / 60
-            val secs = seconds % 60
-            tvRecordingTime.text = String.format("录音中... %02d:%02d", minutes, secs)
+            tvRecordingTime.text = String.format("录音中... %02d:%02d", seconds / 60, seconds % 60)
             handler.postDelayed(this, 1000)
         }
     }
 
-    // ===== 拍照 =====
-    private val takePictureLauncher = registerForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { success ->
-        try {
-            if (success) {
-                val photoPath = CameraHelper.getCurrentPhotoPath()
-                if (photoPath != null && File(photoPath).exists()) {
-                    photoPaths.add(photoPath)
-                    photoAdapter.addPhoto(photoPath)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "拍照处理失败", Toast.LENGTH_SHORT).show()
-        } finally {
-            CameraHelper.clearCurrentPhoto()
-        }
+    private fun getPhotoFolder(): String {
+        val planting = etPlantingDate.text.toString().trim()
+        val group = actvTreatmentGroup.text.toString().trim()
+        return if (planting.isNotEmpty() && group.isNotEmpty()) {
+            CameraHelper.generateFolderName(planting, group)
+        } else ""
     }
 
-    // ===== 从相册选择 =====
-    private val pickImageLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
+    private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         try {
-            if (uri != null) {
-                // 复制到 app 私有目录
+            if (success) {
+                val path = CameraHelper.getCurrentPhotoPath()
+                if (path != null && File(path).exists() && photoPaths.size < 5) {
+                    photoPaths.add(path)
+                    photoAdapter.addPhoto(path)
+                    updatePhotoCount()
+                }
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+        finally { CameraHelper.clearCurrentPhoto() }
+    }
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        try {
+            if (uri != null && photoPaths.size < 5) {
+                val folder = getPhotoFolder()
                 val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                val storageDir = File(getExternalFilesDir(null), "images")
+                val imagesRoot = File(getExternalFilesDir(null), "images")
+                val storageDir = if (folder.isNotEmpty()) File(imagesRoot, folder) else imagesRoot
                 if (!storageDir.exists()) storageDir.mkdirs()
                 val destFile = File(storageDir, "PICK_${timeStamp}.jpg")
-
-                contentResolver.openInputStream(uri)?.use { input ->
-                    destFile.outputStream().use { output -> input.copyTo(output) }
-                }
-
+                contentResolver.openInputStream(uri)?.use { input -> destFile.outputStream().use { output -> input.copyTo(output) } }
                 if (destFile.exists()) {
                     photoPaths.add(destFile.absolutePath)
                     photoAdapter.addPhoto(destFile.absolutePath)
+                    updatePhotoCount()
                 }
+            } else if (photoPaths.size >= 5) {
+                Toast.makeText(this, "最多5张照片", Toast.LENGTH_SHORT).show()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "选择图片失败", Toast.LENGTH_SHORT).show()
-        }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
-    // ===== 系统语音识别 =====
-    private val voiceRecognitionLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            if (!matches.isNullOrEmpty()) {
-                val text = matches[0]
-                val current = etDescription.text.toString()
-                if (current.isEmpty()) {
-                    etDescription.setText(text)
-                } else {
-                    etDescription.setText("$current\n$text")
+    private val voiceRecognitionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        when (result.resultCode) {
+            RESULT_OK -> {
+                val matches = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                if (!matches.isNullOrEmpty()) {
+                    val text = matches[0]
+                    val current = etObservation.text.toString()
+                    etObservation.setText(if (current.isEmpty()) text else "$current\n$text")
+                    etObservation.setSelection(etObservation.text?.length ?: 0)
+                    tvVoiceStatus.text = "✅ 识别完成"
+                    tvVoiceStatus.visibility = View.VISIBLE
+                    handler.postDelayed({ tvVoiceStatus.visibility = View.GONE }, 2000)
                 }
-                etDescription.setSelection(etDescription.text?.length ?: 0)
-                tvVoiceStatus.text = "✅ 识别完成: $text"
+            }
+            else -> {
+                tvVoiceStatus.text = "⚠ 识别失败，点击重试"
                 tvVoiceStatus.visibility = View.VISIBLE
-                handler.postDelayed({ tvVoiceStatus.visibility = View.GONE }, 3000)
+                tvVoiceStatus.setOnClickListener { tryVoiceRecognition(true); tvVoiceStatus.visibility = View.GONE }
             }
         }
-    }
-
-    companion object {
-        private const val CAMERA_PERMISSION_CODE = 101
-        private const val AUDIO_PERMISSION_CODE = 102
-
-        // 保存状态的 Key
-        private const val KEY_PHOTO_PATHS = "photo_paths"
-        private const val KEY_AUDIO_PATH = "audio_path"
-    }
-
-    // ===== 保存状态（防止 Activity 被回收后数据丢失）=====
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putStringArrayList(KEY_PHOTO_PATHS, ArrayList(photoPaths))
-        outState.putString(KEY_AUDIO_PATH, currentAudioPath)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -179,41 +157,45 @@ class AddRecordActivity : AppCompatActivity() {
         database = AppDatabase.getDatabase(this)
         audioRecorderHelper = AudioRecorderHelper(this)
 
-        // 恢复被回收的状态
         if (savedInstanceState != null) {
-            val savedPaths = savedInstanceState.getStringArrayList(KEY_PHOTO_PATHS)
-            if (savedPaths != null) {
-                photoPaths.addAll(savedPaths)
-            }
-            currentAudioPath = savedInstanceState.getString(KEY_AUDIO_PATH)
+            savedInstanceState.getStringArrayList("photo_paths")?.let { photoPaths.addAll(it) }
+            currentAudioPath = savedInstanceState.getString("audio_path")
         }
 
-        // 检查是否编辑模式
         editRecordId = intent.getLongExtra("record_id", -1)
         isEditMode = editRecordId > 0
 
         initViews()
         setupPhotoRecyclerView()
         setupClickListeners()
-        loadSampleTypes()
+        loadFilterDates()
+        loadTreatmentGroups()
 
-        if (isEditMode) {
-            loadRecordForEdit()
-        } else if (savedInstanceState == null) {
-            // 只在首次创建时生成编号，恢复时不覆盖
-            generateExperimentNumber()
+        if (isEditMode) loadRecordForEdit()
+        else if (savedInstanceState == null) {
+            val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            etPlantingDate.setText(today)
+            etCreationDate.setText(today)
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putStringArrayList("photo_paths", ArrayList(photoPaths))
+        outState.putString("audio_path", currentAudioPath)
+    }
+
     private fun initViews() {
-        etExperimentNumber = findViewById(R.id.etExperimentNumber)
-        actvSampleName = findViewById(R.id.actvSampleName)
-        etCultureTime = findViewById(R.id.etCultureTime)
-        etDescription = findViewById(R.id.etDescription)
+        etPlantingDate = findViewById(R.id.etPlantingDate)
+        etCreationDate = findViewById(R.id.etCreationDate)
+        actvTreatmentGroup = findViewById(R.id.actvTreatmentGroup)
+        actvFilterDate = findViewById(R.id.actvFilterDate)
+        etObservation = findViewById(R.id.etObservation)
         etNotes = findViewById(R.id.etNotes)
         rvPhotos = findViewById(R.id.rvPhotos)
         btnVoiceInput = findViewById(R.id.btnVoiceInput)
         tvVoiceStatus = findViewById(R.id.tvVoiceStatus)
+        tvPhotoCount = findViewById(R.id.tvPhotoCount)
         btnTakePhoto = findViewById(R.id.btnTakePhoto)
         btnRecord = findViewById(R.id.btnRecord)
         layoutRecording = findViewById(R.id.layoutRecording)
@@ -222,61 +204,125 @@ class AddRecordActivity : AppCompatActivity() {
         btnSave = findViewById(R.id.btnSave)
         cardYesterdayRef = findViewById(R.id.cardYesterdayRef)
         tvYesterdayRef = findViewById(R.id.tvYesterdayRef)
-        tvYesterdayDate = findViewById(R.id.tvYesterdayDate)
+        rvYesterdayPhotos = findViewById(R.id.rvYesterdayPhotos)
 
         val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
         if (isEditMode) toolbar.title = "编辑实验记录"
         setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
-        // 管理样品按钮
-        findViewById<View>(R.id.tvManageSamples).setOnClickListener {
-            startActivity(Intent(this, SampleManageActivity::class.java))
+        // 种植日期选择器
+        etPlantingDate.setOnClickListener {
+            val cal = Calendar.getInstance()
+            DatePickerDialog(this, { _, year, month, day ->
+                val dateStr = String.format("%04d-%02d-%02d", year, month + 1, day)
+                etPlantingDate.setText(dateStr)
+                actvTreatmentGroup.setText("")
+                loadTreatmentGroupsForDate(dateStr)
+                loadLastReference()
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
-        // 恢复录音信息显示
+        // 记录日期选择器（默认今天，可修改）
+        etCreationDate.setOnClickListener {
+            DatePickerDialog(this, { _, year, month, day ->
+                val dateStr = String.format("%04d-%02d-%02d", year, month + 1, day)
+                etCreationDate.setText(dateStr)
+                creationCalendar.set(year, month, day)
+                loadLastReference() // 记录日期变化时刷新参照
+            }, creationCalendar.get(Calendar.YEAR), creationCalendar.get(Calendar.MONTH), creationCalendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
+        // 顶部筛选下拉框 - 选择已有的种植日期
+        actvFilterDate.setOnItemClickListener { _, _, _, _ ->
+            val selectedDate = actvFilterDate.text.toString().trim()
+            if (selectedDate.isNotEmpty()) {
+                etPlantingDate.setText(selectedDate)
+                actvTreatmentGroup.setText("")
+                loadTreatmentGroupsForDate(selectedDate)
+                loadLastReference()
+            }
+        }
+
+        // 管理处理组
+        findViewById<View>(R.id.tvManageGroups).setOnClickListener {
+            startActivity(Intent(this, TreatmentGroupManageActivity::class.java))
+        }
+
+        // 处理组选择变化
+        actvTreatmentGroup.setOnItemClickListener { _, _, _, _ -> loadLastReference() }
+
+        updatePhotoCount()
+
+        // 恢复录音
         if (currentAudioPath != null && File(currentAudioPath!!).exists()) {
-            val file = File(currentAudioPath!!)
             tvAudioInfo.visibility = View.VISIBLE
-            tvAudioInfo.text = "已有录音: ${file.name} (${FileHelper.formatFileSize(file.length())})"
+            tvAudioInfo.text = "已有录音: ${File(currentAudioPath!!).name}"
         }
-
-        // 样品选择变化时加载昨日参考
-        actvSampleName.setOnItemClickListener { _, _, _, _ -> loadYesterdayReference() }
-        actvSampleName.setOnFocusChangeListener { _, hasFocus -> if (!hasFocus) loadYesterdayReference() }
     }
 
-    private fun loadSampleTypes() {
+    private fun updatePhotoCount() {
+        tvPhotoCount.text = "  （${photoPaths.size}/5）*必填"
+    }
+
+    /**
+     * 加载顶部筛选：实验管理中有处理组数据的种植日期
+     */
+    private fun loadFilterDates() {
         lifecycleScope.launch {
-            val names = withContext(Dispatchers.IO) { database.sampleTypeDao().getAllSampleNames() }
+            val dates = withContext(Dispatchers.IO) { database.treatmentGroupDao().getAllPlantingDates() }
             withContext(Dispatchers.Main) {
-                val adapter = ArrayAdapter(this@AddRecordActivity, android.R.layout.simple_dropdown_item_1line, names)
-                actvSampleName.setAdapter(adapter)
+                val adapter = ArrayAdapter(this@AddRecordActivity, android.R.layout.simple_dropdown_item_1line, dates)
+                actvFilterDate.setAdapter(adapter)
             }
         }
     }
 
-    private fun loadYesterdayReference() {
-        val sampleName = actvSampleName.text.toString().trim()
-        if (sampleName.isEmpty()) { cardYesterdayRef.visibility = View.GONE; return }
+    private fun loadTreatmentGroups() {
+        val date = etPlantingDate.text.toString().trim()
+        if (date.isNotEmpty()) {
+            loadTreatmentGroupsForDate(date)
+        }
+    }
+
+    private fun loadTreatmentGroupsForDate(plantingDate: String) {
+        lifecycleScope.launch {
+            val names = withContext(Dispatchers.IO) { database.treatmentGroupDao().getNamesByPlantingDate(plantingDate) }
+            withContext(Dispatchers.Main) {
+                val adapter = ArrayAdapter(this@AddRecordActivity, android.R.layout.simple_dropdown_item_1line, names)
+                actvTreatmentGroup.setAdapter(adapter)
+            }
+        }
+    }
+
+    /**
+     * 加载上次实验参照：同一处理组在记录日期之前最近的一条记录
+     */
+    private fun loadLastReference() {
+        val group = actvTreatmentGroup.text.toString().trim()
+        if (group.isEmpty()) { cardYesterdayRef.visibility = View.GONE; return }
+
+        // 用当前记录日期的 23:59:59 作为上界，找之前最近的一条
+        val beforeTime = creationCalendar.timeInMillis + 24 * 60 * 60 * 1000 - 1
 
         lifecycleScope.launch {
-            val records = withContext(Dispatchers.IO) { database.recordDao().getRecordsBySampleName(sampleName) }
-
-            val cal = Calendar.getInstance()
-            cal.add(Calendar.DAY_OF_YEAR, -1)
-            cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
-            val yesterdayStart = cal.timeInMillis
-            cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59)
-            val yesterdayEnd = cal.timeInMillis
-
-            val yesterdayRecord = records.find { it.createdAt in yesterdayStart..yesterdayEnd } ?: records.firstOrNull()
+            val record = withContext(Dispatchers.IO) { database.recordDao().getLatestByTreatmentGroupBefore(group, beforeTime) }
 
             withContext(Dispatchers.Main) {
-                if (yesterdayRecord != null) {
+                if (record != null) {
                     cardYesterdayRef.visibility = View.VISIBLE
-                    tvYesterdayRef.text = "观察: ${yesterdayRecord.observationResult}\n描述: ${yesterdayRecord.description}"
-                    tvYesterdayDate.text = "📅 ${FileHelper.formatDateTime(yesterdayRecord.createdAt)}"
+                    val dateInfo = "种植: ${record.plantingDate}  记录: ${FileHelper.formatDate(record.createdAt)}"
+                    tvYesterdayRef.text = "上次观察: ${record.observationResult}\n📅 $dateInfo"
+
+                    if (record.photoPaths.isNotEmpty()) {
+                        val paths = record.photoPaths.split(",")
+                        val refAdapter = PhotoAdapter(photos = paths.toMutableList(), isEditable = false)
+                        rvYesterdayPhotos.layoutManager = LinearLayoutManager(this@AddRecordActivity, LinearLayoutManager.HORIZONTAL, false)
+                        rvYesterdayPhotos.adapter = refAdapter
+                        rvYesterdayPhotos.visibility = View.VISIBLE
+                    } else {
+                        rvYesterdayPhotos.visibility = View.GONE
+                    }
                 } else {
                     cardYesterdayRef.visibility = View.GONE
                 }
@@ -289,53 +335,47 @@ class AddRecordActivity : AppCompatActivity() {
             val record = withContext(Dispatchers.IO) { database.recordDao().getRecordById(editRecordId) }
             withContext(Dispatchers.Main) {
                 if (record != null) {
-                    etExperimentNumber.setText(record.experimentNumber)
-                    actvSampleName.setText(record.sampleName)
-                    etCultureTime.setText(record.cultureTime)
-                    // 合并观察结果和描述
-                    val merged = listOf(record.observationResult, record.description)
-                        .filter { it.isNotEmpty() }
-                        .joinToString("\n")
-                    etDescription.setText(merged)
+                    etPlantingDate.setText(record.plantingDate)
+                    actvTreatmentGroup.setText(record.treatmentGroup)
+                    etObservation.setText(record.observationResult)
                     etNotes.setText(record.notes)
 
-                    if (record.photoPaths.isNotEmpty()) {
-                        val paths = record.photoPaths.split(",")
-                        photoPaths.clear()
-                        photoPaths.addAll(paths)
-                        photoAdapter.notifyDataSetChanged()
-                    }
+                    // 恢复记录日期
+                    val cal = Calendar.getInstance()
+                    cal.timeInMillis = record.createdAt
+                    creationCalendar = cal
+                    etCreationDate.setText(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.time))
 
+                    if (record.photoPaths.isNotEmpty()) {
+                        photoPaths.clear()
+                        photoPaths.addAll(record.photoPaths.split(","))
+                        photoAdapter.notifyDataSetChanged()
+                        updatePhotoCount()
+                    }
                     if (record.audioPath.isNotEmpty()) {
                         currentAudioPath = record.audioPath
-                        val file = File(record.audioPath)
                         tvAudioInfo.visibility = View.VISIBLE
-                        tvAudioInfo.text = "已有录音: ${file.name}"
+                        tvAudioInfo.text = "已有录音: ${File(record.audioPath).name}"
                     }
-
                     btnSave.text = "✅ 更新记录"
-                    loadYesterdayReference()
+                    loadLastReference()
                 }
             }
         }
     }
 
-    private fun generateExperimentNumber() {
-        val dateStr = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-        val random = (1000..9999).random()
-        etExperimentNumber.setText("EXP-${dateStr}-${random}")
-    }
-
     private fun setupPhotoRecyclerView() {
         photoAdapter = PhotoAdapter(
             photos = photoPaths.toMutableList(),
-            onDeleteClick = { position -> photoAdapter.removePhoto(position); photoPaths.removeAt(position) },
+            onDeleteClick = { position ->
+                photoAdapter.removePhoto(position)
+                photoPaths.removeAt(position)
+                updatePhotoCount()
+            },
             isEditable = true
         )
-        rvPhotos.apply {
-            layoutManager = LinearLayoutManager(this@AddRecordActivity, LinearLayoutManager.HORIZONTAL, false)
-            adapter = photoAdapter
-        }
+        rvPhotos.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvPhotos.adapter = photoAdapter
     }
 
     private fun setupClickListeners() {
@@ -346,185 +386,169 @@ class AddRecordActivity : AppCompatActivity() {
         btnSave.setOnClickListener { saveRecord() }
     }
 
-    // ===== 语音输入：自动匹配机型 =====
+    // ===== 语音 =====
     private fun startVoiceInput() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), AUDIO_PERMISSION_CODE)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 102)
             return
         }
+        tryVoiceRecognition(false)
+    }
 
+    private fun tryVoiceRecognition(isRetry: Boolean) {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh-CN")
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh-CN")
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "请说出实验描述")
+            putExtra(RecognizerIntent.EXTRA_PROMPT, if (isRetry) "请重新说出" else "请说出观察记录")
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
         }
 
-        val manufacturer = Build.MANUFACTURER.lowercase()
+        val mfr = Build.MANUFACTURER.lowercase()
+        val services = when {
+            mfr.contains("samsung") -> listOf(
+                "com.samsung.android.bixby.agent" to "com.samsung.android.bixby.agent.mainui.voiceinteraction.RecognitionServiceTrampoline",
+                "com.samsung.android.vassistant" to "com.samsung.android.vassistant.service.VoiceRecognitionService"
+            )
+            mfr.contains("meizu") -> listOf(
+                "com.meizu.voiceassistant" to "com.meizu.voiceassistant.speech.RecognitionService"
+            )
+            mfr.contains("xiaomi") || mfr.contains("redmi") -> listOf(
+                "com.miui.voiceassist" to "com.miui.voiceassist.VoiceRecognitionService"
+            )
+            mfr.contains("huawei") || mfr.contains("honor") -> listOf(
+                "com.huawei.vassistant" to "com.huawei.vassistant.service.VoiceRecognitionService"
+            )
+            else -> emptyList()
+        }
 
-        // 三星：Bixby 语音
-        if (manufacturer.contains("samsung")) {
+        for ((pkg, cls) in services) {
             try {
-                intent.component = android.content.ComponentName(
-                    "com.samsung.android.bixby.agent",
-                    "com.samsung.android.bixby.agent.mainui.voiceinteraction.RecognitionServiceTrampoline"
-                )
+                intent.component = android.content.ComponentName(pkg, cls)
                 voiceRecognitionLauncher.launch(intent)
                 return
-            } catch (_: Exception) { }
+            } catch (_: Exception) { continue }
         }
 
-        // 魅族：Aicy 语音
-        if (manufacturer.contains("meizu")) {
-            try {
-                intent.component = android.content.ComponentName(
-                    "com.meizu.voiceassistant",
-                    "com.meizu.voiceassistant.speech.RecognitionService"
-                )
-                voiceRecognitionLauncher.launch(intent)
-                return
-            } catch (_: Exception) { }
-        }
-
-        // 通用兜底：系统默认语音
         try {
+            intent.component = null
             voiceRecognitionLauncher.launch(intent)
-        } catch (e: Exception) {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("语音识别不可用")
-                .setMessage("您的设备未安装语音识别服务。\n\n请安装「讯飞语记」或「百度输入法」等带语音识别的应用。\n\n也可以直接手动输入。")
-                .setPositiveButton("确定", null)
-                .show()
+        } catch (_: Exception) {
+            Toast.makeText(this, "语音识别不可用，请手动输入", Toast.LENGTH_LONG).show()
         }
     }
 
     // ===== 拍照 =====
     private fun takePhoto() {
+        if (photoPaths.size >= 5) { Toast.makeText(this, "最多5张照片", Toast.LENGTH_SHORT).show(); return }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 101)
             return
         }
         try {
-            val (uri, _) = CameraHelper.createImageFile(this)
+            val folder = getPhotoFolder()
+            val (uri, _) = CameraHelper.createImageFile(this, folder)
             takePictureLauncher.launch(uri)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "无法启动相机: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
+        } catch (e: Exception) { Toast.makeText(this, "无法启动相机", Toast.LENGTH_SHORT).show() }
     }
 
     // ===== 录音 =====
     private fun startRecording() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), AUDIO_PERMISSION_CODE)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 102)
             return
         }
         val audioPath = audioRecorderHelper.startRecording()
         if (audioPath != null) {
-            isRecording = true
-            currentAudioPath = audioPath
-            btnRecord.text = "⏹ 停止录音"
-            layoutRecording.visibility = View.VISIBLE
-            recordingStartTime = System.currentTimeMillis()
-            handler.post(recordingTimerRunnable)
-        } else {
-            Toast.makeText(this, "录音启动失败", Toast.LENGTH_SHORT).show()
+            isRecording = true; currentAudioPath = audioPath
+            btnRecord.text = "⏹ 停止录音"; layoutRecording.visibility = View.VISIBLE
+            recordingStartTime = System.currentTimeMillis(); handler.post(recordingTimerRunnable)
         }
     }
 
     private fun stopRecording() {
-        val audioPath = audioRecorderHelper.stopRecording()
-        isRecording = false
-        btnRecord.text = "🎙️ 开始录音"
-        layoutRecording.visibility = View.GONE
+        audioRecorderHelper.stopRecording()
+        isRecording = false; btnRecord.text = "🎙️ 开始录音"; layoutRecording.visibility = View.GONE
         handler.removeCallbacks(recordingTimerRunnable)
-
-        if (audioPath != null) {
-            currentAudioPath = audioPath
-            val file = File(audioPath)
+        if (currentAudioPath != null) {
             tvAudioInfo.visibility = View.VISIBLE
-            tvAudioInfo.text = "录音: ${file.name} (${FileHelper.formatFileSize(file.length())})"
-            Toast.makeText(this, "录音已保存", Toast.LENGTH_SHORT).show()
+            tvAudioInfo.text = "录音: ${File(currentAudioPath!!).name}"
         }
     }
 
     // ===== 保存 =====
     private fun saveRecord() {
-        val experimentNumber = etExperimentNumber.text.toString().trim()
-        val sampleName = actvSampleName.text.toString().trim()
-        val cultureTime = etCultureTime.text.toString().trim()
-        val description = etDescription.text.toString().trim()
+        val plantingDate = etPlantingDate.text.toString().trim()
+        val treatmentGroup = actvTreatmentGroup.text.toString().trim()
+        val observation = etObservation.text.toString().trim()
         val notes = etNotes.text.toString().trim()
 
-        if (experimentNumber.isEmpty()) { etExperimentNumber.error = "请输入实验编号"; return }
-        if (sampleName.isEmpty()) { actvSampleName.error = "请选择或输入样品名称"; return }
+        if (plantingDate.isEmpty()) { etPlantingDate.error = "请选择种植日期"; return }
+        if (treatmentGroup.isEmpty()) { actvTreatmentGroup.error = "请选择处理组"; return }
         if (photoPaths.isEmpty()) { Toast.makeText(this, "请至少拍摄一张实验照片", Toast.LENGTH_SHORT).show(); return }
 
-        // 统一存到 description 字段，observationResult 留空
-        val observationResult = ""
-        val desc = description
+        // 记录日期：用户选择的日期，转为时间戳（当天 00:00:00）
+        val creationDateStr = etCreationDate.text.toString().trim()
+        val creationTimestamp = try {
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val date = sdf.parse(creationDateStr)
+            date?.time ?: System.currentTimeMillis()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
 
         lifecycleScope.launch {
-            val existingNames = withContext(Dispatchers.IO) { database.sampleTypeDao().getAllSampleNames() }
-            if (!existingNames.contains(sampleName)) {
-                withContext(Dispatchers.IO) { database.sampleTypeDao().insert(SampleTypeEntity(name = sampleName)) }
+            // 自动保存处理组
+            val existing = withContext(Dispatchers.IO) { database.treatmentGroupDao().getNamesByPlantingDate(plantingDate) }
+            if (!existing.contains(treatmentGroup)) {
+                withContext(Dispatchers.IO) { database.treatmentGroupDao().insert(TreatmentGroupEntity(name = treatmentGroup, plantingDate = plantingDate)) }
             }
 
             if (isEditMode) {
-                val existing = withContext(Dispatchers.IO) { database.recordDao().getRecordById(editRecordId) }
-                if (existing != null) {
-                    val updated = existing.copy(
-                        experimentNumber = experimentNumber, sampleName = sampleName,
-                        cultureTime = cultureTime, observationResult = observationResult,
-                        description = desc, notes = notes,
+                val old = withContext(Dispatchers.IO) { database.recordDao().getRecordById(editRecordId) }
+                if (old != null) {
+                    val updated = old.copy(
+                        plantingDate = plantingDate, treatmentGroup = treatmentGroup,
+                        observationResult = observation, notes = notes,
                         photoPaths = photoPaths.joinToString(","), audioPath = currentAudioPath ?: "",
-                        updatedAt = System.currentTimeMillis()
+                        createdAt = creationTimestamp, updatedAt = System.currentTimeMillis()
                     )
                     withContext(Dispatchers.IO) { database.recordDao().update(updated) }
-                    Toast.makeText(this@AddRecordActivity, "记录已更新", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddRecordActivity, "已更新", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             } else {
                 val record = RecordEntity(
-                    experimentNumber = experimentNumber, sampleName = sampleName,
-                    cultureTime = cultureTime, observationResult = observationResult,
-                    description = desc, notes = notes,
+                    plantingDate = plantingDate, treatmentGroup = treatmentGroup,
+                    observationResult = observation, notes = notes,
                     photoPaths = photoPaths.joinToString(","), audioPath = currentAudioPath ?: "",
-                    createdAt = System.currentTimeMillis(), updatedAt = System.currentTimeMillis()
+                    createdAt = creationTimestamp, updatedAt = System.currentTimeMillis()
                 )
                 val id = withContext(Dispatchers.IO) { database.recordDao().insert(record) }
                 if (id > 0) {
-                    Toast.makeText(this@AddRecordActivity, "记录保存成功", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddRecordActivity, "保存成功", Toast.LENGTH_SHORT).show()
                     finish()
-                } else {
-                    Toast.makeText(this@AddRecordActivity, "保存失败", Toast.LENGTH_SHORT).show()
                 }
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            CAMERA_PERMISSION_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) takePhoto()
-                else Toast.makeText(this, "需要相机权限才能拍照", Toast.LENGTH_LONG).show()
-            }
-            AUDIO_PERMISSION_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) startRecording()
-                else Toast.makeText(this, "需要录音权限才能录音", Toast.LENGTH_LONG).show()
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        loadSampleTypes()
+        loadFilterDates()
+        loadTreatmentGroups()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (isRecording) audioRecorderHelper.cancelRecording()
         handler.removeCallbacks(recordingTimerRunnable)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (requestCode == 101) takePhoto()
+        }
     }
 }

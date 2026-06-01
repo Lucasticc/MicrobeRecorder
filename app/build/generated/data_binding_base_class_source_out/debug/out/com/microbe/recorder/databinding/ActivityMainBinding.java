@@ -4,16 +4,13 @@ package com.microbe.recorder.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.microbe.recorder.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -24,83 +21,16 @@ public final class ActivityMainBinding implements ViewBinding {
   private final ConstraintLayout rootView;
 
   @NonNull
-  public final LinearLayout actionButtons;
+  public final BottomNavigationView bottomNav;
 
   @NonNull
-  public final MaterialButton btnAddRecord;
-
-  @NonNull
-  public final MaterialButton btnExportExcel;
-
-  @NonNull
-  public final MaterialButton btnExportWord;
-
-  @NonNull
-  public final MaterialButton btnHistory;
-
-  @NonNull
-  public final LinearLayout emptyState;
-
-  @NonNull
-  public final LinearLayout exportButtons;
-
-  @NonNull
-  public final View headerBg;
-
-  @NonNull
-  public final RecyclerView rvRecentRecords;
-
-  @NonNull
-  public final MaterialCardView statsCard;
-
-  @NonNull
-  public final TextView tvAppTitle;
-
-  @NonNull
-  public final TextView tvManageSamples;
-
-  @NonNull
-  public final TextView tvRecentTitle;
-
-  @NonNull
-  public final TextView tvSubtitle;
-
-  @NonNull
-  public final TextView tvTodayCount;
-
-  @NonNull
-  public final TextView tvTotalCount;
-
-  @NonNull
-  public final TextView tvWeekCount;
+  public final FrameLayout fragmentContainer;
 
   private ActivityMainBinding(@NonNull ConstraintLayout rootView,
-      @NonNull LinearLayout actionButtons, @NonNull MaterialButton btnAddRecord,
-      @NonNull MaterialButton btnExportExcel, @NonNull MaterialButton btnExportWord,
-      @NonNull MaterialButton btnHistory, @NonNull LinearLayout emptyState,
-      @NonNull LinearLayout exportButtons, @NonNull View headerBg,
-      @NonNull RecyclerView rvRecentRecords, @NonNull MaterialCardView statsCard,
-      @NonNull TextView tvAppTitle, @NonNull TextView tvManageSamples,
-      @NonNull TextView tvRecentTitle, @NonNull TextView tvSubtitle, @NonNull TextView tvTodayCount,
-      @NonNull TextView tvTotalCount, @NonNull TextView tvWeekCount) {
+      @NonNull BottomNavigationView bottomNav, @NonNull FrameLayout fragmentContainer) {
     this.rootView = rootView;
-    this.actionButtons = actionButtons;
-    this.btnAddRecord = btnAddRecord;
-    this.btnExportExcel = btnExportExcel;
-    this.btnExportWord = btnExportWord;
-    this.btnHistory = btnHistory;
-    this.emptyState = emptyState;
-    this.exportButtons = exportButtons;
-    this.headerBg = headerBg;
-    this.rvRecentRecords = rvRecentRecords;
-    this.statsCard = statsCard;
-    this.tvAppTitle = tvAppTitle;
-    this.tvManageSamples = tvManageSamples;
-    this.tvRecentTitle = tvRecentTitle;
-    this.tvSubtitle = tvSubtitle;
-    this.tvTodayCount = tvTodayCount;
-    this.tvTotalCount = tvTotalCount;
-    this.tvWeekCount = tvWeekCount;
+    this.bottomNav = bottomNav;
+    this.fragmentContainer = fragmentContainer;
   }
 
   @Override
@@ -130,112 +60,19 @@ public final class ActivityMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.actionButtons;
-      LinearLayout actionButtons = ViewBindings.findChildViewById(rootView, id);
-      if (actionButtons == null) {
+      id = R.id.bottomNav;
+      BottomNavigationView bottomNav = ViewBindings.findChildViewById(rootView, id);
+      if (bottomNav == null) {
         break missingId;
       }
 
-      id = R.id.btnAddRecord;
-      MaterialButton btnAddRecord = ViewBindings.findChildViewById(rootView, id);
-      if (btnAddRecord == null) {
+      id = R.id.fragmentContainer;
+      FrameLayout fragmentContainer = ViewBindings.findChildViewById(rootView, id);
+      if (fragmentContainer == null) {
         break missingId;
       }
 
-      id = R.id.btnExportExcel;
-      MaterialButton btnExportExcel = ViewBindings.findChildViewById(rootView, id);
-      if (btnExportExcel == null) {
-        break missingId;
-      }
-
-      id = R.id.btnExportWord;
-      MaterialButton btnExportWord = ViewBindings.findChildViewById(rootView, id);
-      if (btnExportWord == null) {
-        break missingId;
-      }
-
-      id = R.id.btnHistory;
-      MaterialButton btnHistory = ViewBindings.findChildViewById(rootView, id);
-      if (btnHistory == null) {
-        break missingId;
-      }
-
-      id = R.id.emptyState;
-      LinearLayout emptyState = ViewBindings.findChildViewById(rootView, id);
-      if (emptyState == null) {
-        break missingId;
-      }
-
-      id = R.id.exportButtons;
-      LinearLayout exportButtons = ViewBindings.findChildViewById(rootView, id);
-      if (exportButtons == null) {
-        break missingId;
-      }
-
-      id = R.id.headerBg;
-      View headerBg = ViewBindings.findChildViewById(rootView, id);
-      if (headerBg == null) {
-        break missingId;
-      }
-
-      id = R.id.rvRecentRecords;
-      RecyclerView rvRecentRecords = ViewBindings.findChildViewById(rootView, id);
-      if (rvRecentRecords == null) {
-        break missingId;
-      }
-
-      id = R.id.statsCard;
-      MaterialCardView statsCard = ViewBindings.findChildViewById(rootView, id);
-      if (statsCard == null) {
-        break missingId;
-      }
-
-      id = R.id.tvAppTitle;
-      TextView tvAppTitle = ViewBindings.findChildViewById(rootView, id);
-      if (tvAppTitle == null) {
-        break missingId;
-      }
-
-      id = R.id.tvManageSamples;
-      TextView tvManageSamples = ViewBindings.findChildViewById(rootView, id);
-      if (tvManageSamples == null) {
-        break missingId;
-      }
-
-      id = R.id.tvRecentTitle;
-      TextView tvRecentTitle = ViewBindings.findChildViewById(rootView, id);
-      if (tvRecentTitle == null) {
-        break missingId;
-      }
-
-      id = R.id.tvSubtitle;
-      TextView tvSubtitle = ViewBindings.findChildViewById(rootView, id);
-      if (tvSubtitle == null) {
-        break missingId;
-      }
-
-      id = R.id.tvTodayCount;
-      TextView tvTodayCount = ViewBindings.findChildViewById(rootView, id);
-      if (tvTodayCount == null) {
-        break missingId;
-      }
-
-      id = R.id.tvTotalCount;
-      TextView tvTotalCount = ViewBindings.findChildViewById(rootView, id);
-      if (tvTotalCount == null) {
-        break missingId;
-      }
-
-      id = R.id.tvWeekCount;
-      TextView tvWeekCount = ViewBindings.findChildViewById(rootView, id);
-      if (tvWeekCount == null) {
-        break missingId;
-      }
-
-      return new ActivityMainBinding((ConstraintLayout) rootView, actionButtons, btnAddRecord,
-          btnExportExcel, btnExportWord, btnHistory, emptyState, exportButtons, headerBg,
-          rvRecentRecords, statsCard, tvAppTitle, tvManageSamples, tvRecentTitle, tvSubtitle,
-          tvTodayCount, tvTotalCount, tvWeekCount);
+      return new ActivityMainBinding((ConstraintLayout) rootView, bottomNav, fragmentContainer);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

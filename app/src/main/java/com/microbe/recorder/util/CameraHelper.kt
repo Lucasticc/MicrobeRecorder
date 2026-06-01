@@ -14,16 +14,16 @@ object CameraHelper {
     private var currentPhotoFile: File? = null
 
     /**
-     * 创建临时照片文件并返回 Uri
+     * 创建照片文件，归档到指定子文件夹
+     * @param subfolder 子文件夹名，如 "2024-01-15_A组_2024-01-20"
      */
-    fun createImageFile(context: Context): Pair<Uri, File> {
+    fun createImageFile(context: Context, subfolder: String = ""): Pair<Uri, File> {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName = "MICROBE_${timeStamp}"
+        val imageFileName = "CAMERA_${timeStamp}"
 
-        val storageDir = File(context.getExternalFilesDir(null), "images")
-        if (!storageDir.exists()) {
-            storageDir.mkdirs()
-        }
+        val imagesRoot = File(context.getExternalFilesDir(null), "images")
+        val storageDir = if (subfolder.isNotEmpty()) File(imagesRoot, subfolder) else imagesRoot
+        if (!storageDir.exists()) storageDir.mkdirs()
 
         val imageFile = File.createTempFile(imageFileName, ".jpg", storageDir)
         val imageUri = FileProvider.getUriForFile(
@@ -38,46 +38,15 @@ object CameraHelper {
         return Pair(imageUri, imageFile)
     }
 
-    /**
-     * 获取当前照片 Uri
-     */
     fun getCurrentPhotoUri(): Uri? = currentPhotoUri
-
-    /**
-     * 获取当前照片文件路径
-     */
     fun getCurrentPhotoPath(): String? = currentPhotoFile?.absolutePath
+    fun clearCurrentPhoto() { currentPhotoUri = null; currentPhotoFile = null }
 
     /**
-     * 清除当前照片引用
+     * 生成照片文件夹名: 种植日期_处理组_记录日期
      */
-    fun clearCurrentPhoto() {
-        currentPhotoUri = null
-        currentPhotoFile = null
-    }
-
-    /**
-     * 获取所有保存的照片文件
-     */
-    fun getImageFiles(context: Context): List<File> {
-        val storageDir = File(context.getExternalFilesDir(null), "images")
-        return if (storageDir.exists()) {
-            storageDir.listFiles()?.filter { it.isFile && it.extension == "jpg" }?.sortedByDescending { it.lastModified() } ?: emptyList()
-        } else {
-            emptyList()
-        }
-    }
-
-    /**
-     * 删除照片文件
-     */
-    fun deleteImageFile(path: String): Boolean {
-        return try {
-            val file = File(path)
-            if (file.exists()) file.delete() else false
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+    fun generateFolderName(plantingDate: String, treatmentGroup: String): String {
+        val recordDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        return "${plantingDate}_${treatmentGroup}_${recordDate}"
     }
 }

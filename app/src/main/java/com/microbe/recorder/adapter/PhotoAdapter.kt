@@ -1,12 +1,13 @@
 package com.microbe.recorder.adapter
 
-import android.net.Uri
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.microbe.recorder.ImageViewerActivity
 import com.microbe.recorder.R
 import java.io.File
 
@@ -29,7 +30,6 @@ class PhotoAdapter(
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         val photoPath = photos[position]
 
-        // 加载照片
         Glide.with(holder.itemView.context)
             .load(File(photoPath))
             .centerCrop()
@@ -38,27 +38,28 @@ class PhotoAdapter(
         // 删除按钮
         if (isEditable && onDeleteClick != null) {
             holder.ivDelete.visibility = View.VISIBLE
-            holder.ivDelete.setOnClickListener {
-                onDeleteClick.invoke(position)
-            }
+            holder.ivDelete.setOnClickListener { onDeleteClick.invoke(position) }
         } else {
             holder.ivDelete.visibility = View.GONE
+        }
+
+        // 点击打开图片预览器（支持左右滑动）
+        holder.ivPhoto.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, ImageViewerActivity::class.java)
+            intent.putStringArrayListExtra("photos", ArrayList(photos))
+            intent.putExtra("position", position)
+            context.startActivity(intent)
         }
     }
 
     override fun getItemCount(): Int = photos.size
 
-    /**
-     * 添加照片
-     */
     fun addPhoto(photoPath: String) {
         photos.add(photoPath)
         notifyItemInserted(photos.size - 1)
     }
 
-    /**
-     * 删除照片
-     */
     fun removePhoto(position: Int) {
         if (position in 0 until photos.size) {
             photos.removeAt(position)
@@ -67,14 +68,8 @@ class PhotoAdapter(
         }
     }
 
-    /**
-     * 获取所有照片路径
-     */
     fun getPhotoPaths(): List<String> = photos.toList()
 
-    /**
-     * 更新照片列表
-     */
     fun updatePhotos(newPhotos: List<String>) {
         photos.clear()
         photos.addAll(newPhotos)

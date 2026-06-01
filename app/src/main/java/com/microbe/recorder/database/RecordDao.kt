@@ -24,15 +24,27 @@ interface RecordDao {
     @Query("SELECT * FROM microbe_records WHERE id = :id")
     suspend fun getRecordById(id: Long): RecordEntity?
 
-    @Query("SELECT * FROM microbe_records WHERE sampleName LIKE '%' || :keyword || '%' OR experimentNumber LIKE '%' || :keyword || '%' ORDER BY createdAt DESC")
-    suspend fun searchRecords(keyword: String): List<RecordEntity>
-
     @Query("DELETE FROM microbe_records WHERE id = :id")
     suspend fun deleteById(id: Long)
 
-    @Query("SELECT COUNT(*) FROM microbe_records")
-    suspend fun getRecordCount(): Int
+    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate ORDER BY createdAt DESC")
+    suspend fun getRecordsByPlantingDate(plantingDate: String): List<RecordEntity>
 
-    @Query("SELECT * FROM microbe_records WHERE sampleName = :sampleName ORDER BY createdAt DESC")
-    suspend fun getRecordsBySampleName(sampleName: String): List<RecordEntity>
+    @Query("SELECT * FROM microbe_records WHERE treatmentGroup = :group ORDER BY createdAt DESC")
+    suspend fun getRecordsByTreatmentGroup(group: String): List<RecordEntity>
+
+    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate AND treatmentGroup = :group ORDER BY createdAt DESC")
+    suspend fun getRecordsByPlantingAndGroup(plantingDate: String, group: String): List<RecordEntity>
+
+    @Query("SELECT DISTINCT plantingDate FROM microbe_records ORDER BY plantingDate DESC")
+    suspend fun getAllPlantingDates(): List<String>
+
+    @Query("SELECT DISTINCT treatmentGroup FROM microbe_records ORDER BY treatmentGroup ASC")
+    suspend fun getAllTreatmentGroups(): List<String>
+
+    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLatestByPlantingDate(plantingDate: String): RecordEntity?
+
+    @Query("SELECT * FROM microbe_records WHERE treatmentGroup = :group AND createdAt < :beforeTime ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLatestByTreatmentGroupBefore(group: String, beforeTime: Long): RecordEntity?
 }

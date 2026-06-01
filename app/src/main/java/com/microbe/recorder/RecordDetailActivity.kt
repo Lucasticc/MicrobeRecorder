@@ -142,22 +142,22 @@ class RecordDetailActivity : AppCompatActivity() {
      */
     private fun displayRecord(record: RecordEntity) {
         // 标题
-        tvDetailTitle.text = record.experimentNumber
-        tvDetailSubtitle.text = "${record.sampleName} · ${FileHelper.formatDateTime(record.createdAt)}"
+        tvDetailTitle.text = record.treatmentGroup
+        tvDetailSubtitle.text = "种植: ${record.plantingDate} · ${FileHelper.formatDateTime(record.createdAt)}"
 
         // 基本信息
-        tvExperimentNumber.text = record.experimentNumber
-        tvSampleName.text = record.sampleName
-        tvCultureTime.text = record.cultureTime
+        tvExperimentNumber.text = record.treatmentGroup
+        tvSampleName.text = record.plantingDate
+        tvCultureTime.text = record.treatmentGroup
         tvCreatedAt.text = FileHelper.formatDateTime(record.createdAt)
 
         // 观察结果
         tvObservationResult.text = record.observationResult
 
-        // 实验描述
-        if (record.description.isNotEmpty()) {
+        // 实验描述（复用）
+        if (record.notes.isNotEmpty()) {
             cardDescription.visibility = View.VISIBLE
-            tvDescription.text = record.description
+            tvDescription.text = record.notes
         } else {
             cardDescription.visibility = View.GONE
         }
