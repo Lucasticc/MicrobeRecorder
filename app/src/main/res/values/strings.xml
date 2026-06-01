@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">微生物实验记录</string>
+    <string name="app_name">菌类实验记录</string>
     <string name="add_record">新建记录</string>
     <string name="history">历史记录</string>
     <string name="export_excel">导出 Excel</string>
@@ -11,7 +11,7 @@
     <string name="confirm">确认</string>
     <string name="search_hint">搜索实验编号或样品名称...</string>
     <string name="no_records">暂无实验记录</string>
-    <string name="no_records_hint">点击\"新建记录\"开始记录实验</string>
+    <string name="no_records_hint">点击「新建记录」开始记录实验</string>
     <string name="voice_input">语音输入</string>
     <string name="start_voice">开始语音输入</string>
     <string name="stop_voice">停止语音输入</string>

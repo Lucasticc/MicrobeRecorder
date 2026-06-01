@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     // Views
     private lateinit var tvTotalCount: TextView
     private lateinit var tvTodayCount: TextView
+    private lateinit var tvWeekCount: TextView
     private lateinit var rvRecentRecords: RecyclerView
     private lateinit var emptyState: View
 
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         tvTotalCount = findViewById(R.id.tvTotalCount)
         tvTodayCount = findViewById(R.id.tvTodayCount)
+        tvWeekCount = findViewById(R.id.tvWeekCount)
         rvRecentRecords = findViewById(R.id.rvRecentRecords)
         emptyState = findViewById(R.id.emptyState)
 
@@ -126,6 +128,12 @@ class MainActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.btnExportWord).setOnClickListener {
             exportToWord()
         }
+
+        // 样品管理
+        findViewById<View>(R.id.tvManageSamples).setOnClickListener {
+            val intent = Intent(this, SampleManageActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     /**
@@ -169,6 +177,17 @@ class MainActivity : AppCompatActivity() {
                     SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(record.createdAt)) == today
                 }
                 tvTodayCount.text = todayCount.toString()
+
+                // 本周记录数
+                val cal = java.util.Calendar.getInstance()
+                cal.set(java.util.Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
+                cal.set(java.util.Calendar.MINUTE, 0)
+                cal.set(java.util.Calendar.SECOND, 0)
+                cal.set(java.util.Calendar.MILLISECOND, 0)
+                val weekStart = cal.timeInMillis
+                val weekCount = allRecords.count { it.createdAt >= weekStart }
+                tvWeekCount.text = weekCount.toString()
             }
         }
     }
@@ -194,8 +213,11 @@ class MainActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 if (file != null) {
                     Toast.makeText(this@MainActivity, "Excel导出成功: ${file.name}", Toast.LENGTH_LONG).show()
-                    // 分享文件
-                    FileHelper.shareFile(this@MainActivity, file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    try {
+                        FileHelper.shareFile(this@MainActivity, file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "文件已保存: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+                    }
                 } else {
                     Toast.makeText(this@MainActivity, "Excel导出失败", Toast.LENGTH_SHORT).show()
                 }
@@ -224,8 +246,11 @@ class MainActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 if (file != null) {
                     Toast.makeText(this@MainActivity, "Word导出成功: ${file.name}", Toast.LENGTH_LONG).show()
-                    // 分享文件
-                    FileHelper.shareFile(this@MainActivity, file, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                    try {
+                        FileHelper.shareFile(this@MainActivity, file, "application/msword")
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "文件已保存: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+                    }
                 } else {
                     Toast.makeText(this@MainActivity, "Word导出失败", Toast.LENGTH_SHORT).show()
                 }

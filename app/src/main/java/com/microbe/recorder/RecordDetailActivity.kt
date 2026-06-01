@@ -29,6 +29,8 @@ class RecordDetailActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
 
     // Views
+    private lateinit var tvDetailTitle: TextView
+    private lateinit var tvDetailSubtitle: TextView
     private lateinit var tvExperimentNumber: TextView
     private lateinit var tvSampleName: TextView
     private lateinit var tvCultureTime: TextView
@@ -71,6 +73,8 @@ class RecordDetailActivity : AppCompatActivity() {
      * 初始化Views
      */
     private fun initViews() {
+        tvDetailTitle = findViewById(R.id.tvDetailTitle)
+        tvDetailSubtitle = findViewById(R.id.tvDetailSubtitle)
         tvExperimentNumber = findViewById(R.id.tvExperimentNumber)
         tvSampleName = findViewById(R.id.tvSampleName)
         tvCultureTime = findViewById(R.id.tvCultureTime)
@@ -101,8 +105,9 @@ class RecordDetailActivity : AppCompatActivity() {
 
         // 编辑按钮
         btnEdit.setOnClickListener {
-            // TODO: 跳转到编辑页面
-            Toast.makeText(this, "编辑功能开发中", Toast.LENGTH_SHORT).show()
+            val intent = android.content.Intent(this, AddRecordActivity::class.java)
+            intent.putExtra("record_id", recordId)
+            startActivity(intent)
         }
 
         // 播放录音按钮
@@ -136,6 +141,10 @@ class RecordDetailActivity : AppCompatActivity() {
      * 显示记录数据
      */
     private fun displayRecord(record: RecordEntity) {
+        // 标题
+        tvDetailTitle.text = record.experimentNumber
+        tvDetailSubtitle.text = "${record.sampleName} · ${FileHelper.formatDateTime(record.createdAt)}"
+
         // 基本信息
         tvExperimentNumber.text = record.experimentNumber
         tvSampleName.text = record.sampleName

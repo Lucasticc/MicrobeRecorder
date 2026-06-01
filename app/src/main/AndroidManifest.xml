@@ -18,6 +18,14 @@
 
     <!-- 语音识别权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- 声明查询语音识别应用 -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -50,6 +58,10 @@
 
         <activity
             android:name=".HistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SampleManageActivity"
             android:exported="false" />
 
         <!-- FileProvider for camera -->

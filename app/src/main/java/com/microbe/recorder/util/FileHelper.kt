@@ -14,10 +14,10 @@ import java.util.Locale
 object FileHelper {
 
     /**
-     * 获取导出目录
+     * 获取导出目录（与 file_paths.xml 中的 exports/ 对应）
      */
     fun getExportDir(context: Context): File {
-        val dir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "MicrobeRecorder")
+        val dir = File(context.getExternalFilesDir(null), "exports")
         if (!dir.exists()) {
             dir.mkdirs()
         }

@@ -32,15 +32,22 @@ class SpeechToTextHelper(
     }
 
     /**
-     * 开始语音识别
+     * 开始语音识别（不预检查可用性，直接尝试）
      */
     fun startListening() {
         if (isListening) {
             stopListening()
         }
 
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-            setRecognitionListener(object : RecognitionListener {
+        try {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+
+            if (speechRecognizer == null) {
+                listener.onSpeechError("无法创建语音识别器")
+                return
+            }
+
+            speechRecognizer?.setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
                     listener.onSpeechStarted()
                 }
@@ -62,11 +69,11 @@ class SpeechToTextHelper(
                         SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "权限不足"
                         SpeechRecognizer.ERROR_NETWORK -> "网络错误"
                         SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "网络超时"
-                        SpeechRecognizer.ERROR_NO_MATCH -> "未识别到语音"
-                        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "识别引擎忙"
+                        SpeechRecognizer.ERROR_NO_MATCH -> "未识别到语音，请重试"
+                        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "识别引擎忙，请稍后"
                         SpeechRecognizer.ERROR_SERVER -> "服务器错误"
-                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "语音输入超时"
-                        else -> "未知错误: $error"
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "未检测到语音，请重试"
+                        else -> "识别失败(错误码:$error)"
                     }
                     listener.onSpeechError(errorMessage)
                     isListening = false
@@ -89,46 +96,50 @@ class SpeechToTextHelper(
 
                 override fun onEvent(eventType: Int, params: Bundle?) {}
             })
-        }
 
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.CHINESE.toString())
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Locale.CHINESE.toString())
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        }
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.CHINESE.toString())
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, Locale.CHINESE.toString())
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+            }
 
-        speechRecognizer?.startListening(intent)
-        isListening = true
+            speechRecognizer?.startListening(intent)
+            isListening = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            listener.onSpeechError("语音识别不可用: ${e.message}")
+            isListening = false
+        }
     }
 
-    /**
-     * 停止语音识别
-     */
     fun stopListening() {
-        speechRecognizer?.stopListening()
+        try {
+            speechRecognizer?.stopListening()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         isListening = false
     }
 
-    /**
-     * 取消语音识别
-     */
     fun cancelListening() {
-        speechRecognizer?.cancel()
+        try {
+            speechRecognizer?.cancel()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         isListening = false
     }
 
-    /**
-     * 是否正在监听
-     */
     fun isCurrentlyListening(): Boolean = isListening
 
-    /**
-     * 释放资源
-     */
     fun destroy() {
-        speechRecognizer?.destroy()
+        try {
+            speechRecognizer?.destroy()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         speechRecognizer = null
         isListening = false
     }

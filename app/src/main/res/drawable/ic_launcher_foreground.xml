@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Microscope icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 C54,24 44,34 44,48 C44,53.5 48.5,58 54,58 C59.5,58 64,53.5 64,48 C64,34 54,24 54,24 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,58 L58,58 L58,70 L50,70 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,70 L62,70 L64,76 L44,76 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M42,76 L66,76 L66,80 L42,80 Z" />
+</vector>

@@ -32,4 +32,7 @@ interface RecordDao {
 
     @Query("SELECT COUNT(*) FROM microbe_records")
     suspend fun getRecordCount(): Int
+
+    @Query("SELECT * FROM microbe_records WHERE sampleName = :sampleName ORDER BY createdAt DESC")
+    suspend fun getRecordsBySampleName(sampleName: String): List<RecordEntity>
 }
