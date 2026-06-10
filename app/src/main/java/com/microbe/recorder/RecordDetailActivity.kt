@@ -1,5 +1,6 @@
 package com.microbe.recorder
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.View
@@ -7,6 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.microbe.recorder.viewmodel.HistoryViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -168,7 +170,14 @@ class RecordDetailActivity : AppCompatActivity() {
             val photoPaths = record.photoPaths.split(",")
             val photoAdapter = PhotoAdapter(
                 photos = photoPaths.toMutableList(),
-                isEditable = false
+                isEditable = false,
+                onPhotoClick = { pos ->
+                    val intent = Intent(this, ImageViewerActivity::class.java)
+                    intent.putStringArrayListExtra("photos", ArrayList(photoPaths))
+                    intent.putExtra("position", pos)
+                    intent.putExtra("isEditable", false)
+                    startActivity(intent)
+                }
             )
             rvPhotos.apply {
                 layoutManager = LinearLayoutManager(this@RecordDetailActivity, LinearLayoutManager.HORIZONTAL, false)
@@ -276,6 +285,7 @@ class RecordDetailActivity : AppCompatActivity() {
                     // 删除关联的文件
                     deleteAssociatedFiles()
                     Toast.makeText(this@RecordDetailActivity, "记录已删除", Toast.LENGTH_SHORT).show()
+                    HistoryViewModel.needsRefresh = true
                     finish()
                 } else {
                     Toast.makeText(this@RecordDetailActivity, "删除失败", Toast.LENGTH_SHORT).show()

@@ -31,6 +31,7 @@
     <color name="warning">#FFA726</color>
     <color name="warning_light">#FFF3E0</color>
     <color name="white">#FFFFFFFF</color>
+    <dimen name="focus_indicator_size">80dp</dimen>
     <string name="add_record">新建记录</string>
     <string name="app_name">菌类实验记录</string>
     <string name="cancel">取消</string>

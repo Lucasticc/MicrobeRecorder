@@ -24,12 +24,16 @@ public final class ItemSampleTypeBinding implements ViewBinding {
   public final ImageView ivDelete;
 
   @NonNull
+  public final ImageView ivEdit;
+
+  @NonNull
   public final TextView tvSampleName;
 
   private ItemSampleTypeBinding(@NonNull MaterialCardView rootView, @NonNull ImageView ivDelete,
-      @NonNull TextView tvSampleName) {
+      @NonNull ImageView ivEdit, @NonNull TextView tvSampleName) {
     this.rootView = rootView;
     this.ivDelete = ivDelete;
+    this.ivEdit = ivEdit;
     this.tvSampleName = tvSampleName;
   }
 
@@ -66,13 +70,19 @@ public final class ItemSampleTypeBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.ivEdit;
+      ImageView ivEdit = ViewBindings.findChildViewById(rootView, id);
+      if (ivEdit == null) {
+        break missingId;
+      }
+
       id = R.id.tvSampleName;
       TextView tvSampleName = ViewBindings.findChildViewById(rootView, id);
       if (tvSampleName == null) {
         break missingId;
       }
 
-      return new ItemSampleTypeBinding((MaterialCardView) rootView, ivDelete, tvSampleName);
+      return new ItemSampleTypeBinding((MaterialCardView) rootView, ivDelete, ivEdit, tvSampleName);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -61,17 +61,23 @@
             android:exported="false" />
 
         <activity
-            android:name=".SampleManageActivity"
+            android:name=".TreatmentGroupManageActivity"
             android:exported="false" />
 
         <activity
-            android:name=".TreatmentGroupManageActivity"
+            android:name=".AddTreatmentGroupActivity"
             android:exported="false" />
 
         <activity
             android:name=".ImageViewerActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.MicrobeRecorder" />
+
+        <activity
+            android:name=".CameraActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.MicrobeRecorder" />
 
         <!-- FileProvider for camera -->

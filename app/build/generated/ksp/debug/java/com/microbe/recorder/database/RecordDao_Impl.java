@@ -41,6 +41,8 @@ public final class RecordDao_Impl implements RecordDao {
 
   private final SharedSQLiteStatement __preparedStmtOfDeleteById;
 
+  private final SharedSQLiteStatement __preparedStmtOfUpdateTreatmentGroup;
+
   public RecordDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
     this.__insertionAdapterOfRecordEntity = new EntityInsertionAdapter<RecordEntity>(__db) {
@@ -104,6 +106,14 @@ public final class RecordDao_Impl implements RecordDao {
       @NonNull
       public String createQuery() {
         final String _query = "DELETE FROM microbe_records WHERE id = ?";
+        return _query;
+      }
+    };
+    this.__preparedStmtOfUpdateTreatmentGroup = new SharedSQLiteStatement(__db) {
+      @Override
+      @NonNull
+      public String createQuery() {
+        final String _query = "UPDATE microbe_records SET treatmentGroup = ? WHERE treatmentGroup = ? AND plantingDate = ?";
         return _query;
       }
     };
@@ -189,8 +199,38 @@ public final class RecordDao_Impl implements RecordDao {
   }
 
   @Override
+  public Object updateTreatmentGroup(final String oldName, final String newName,
+      final String plantingDate, final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        final SupportSQLiteStatement _stmt = __preparedStmtOfUpdateTreatmentGroup.acquire();
+        int _argIndex = 1;
+        _stmt.bindString(_argIndex, newName);
+        _argIndex = 2;
+        _stmt.bindString(_argIndex, oldName);
+        _argIndex = 3;
+        _stmt.bindString(_argIndex, plantingDate);
+        try {
+          __db.beginTransaction();
+          try {
+            _stmt.executeUpdateDelete();
+            __db.setTransactionSuccessful();
+            return Unit.INSTANCE;
+          } finally {
+            __db.endTransaction();
+          }
+        } finally {
+          __preparedStmtOfUpdateTreatmentGroup.release(_stmt);
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
   public Object getAllRecords(final Continuation<? super List<RecordEntity>> $completion) {
-    final String _sql = "SELECT * FROM microbe_records ORDER BY createdAt DESC";
+    final String _sql = "SELECT * FROM microbe_records ORDER BY createdAt DESC, id DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<RecordEntity>>() {
@@ -299,7 +339,7 @@ public final class RecordDao_Impl implements RecordDao {
   @Override
   public Object getRecordsByPlantingDate(final String plantingDate,
       final Continuation<? super List<RecordEntity>> $completion) {
-    final String _sql = "SELECT * FROM microbe_records WHERE plantingDate = ? ORDER BY createdAt DESC";
+    final String _sql = "SELECT * FROM microbe_records WHERE plantingDate = ? ORDER BY createdAt DESC, id DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     _statement.bindString(_argIndex, plantingDate);
@@ -355,7 +395,7 @@ public final class RecordDao_Impl implements RecordDao {
   @Override
   public Object getRecordsByTreatmentGroup(final String group,
       final Continuation<? super List<RecordEntity>> $completion) {
-    final String _sql = "SELECT * FROM microbe_records WHERE treatmentGroup = ? ORDER BY createdAt DESC";
+    final String _sql = "SELECT * FROM microbe_records WHERE treatmentGroup = ? ORDER BY createdAt DESC, id DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
     _statement.bindString(_argIndex, group);
@@ -411,7 +451,7 @@ public final class RecordDao_Impl implements RecordDao {
   @Override
   public Object getRecordsByPlantingAndGroup(final String plantingDate, final String group,
       final Continuation<? super List<RecordEntity>> $completion) {
-    final String _sql = "SELECT * FROM microbe_records WHERE plantingDate = ? AND treatmentGroup = ? ORDER BY createdAt DESC";
+    final String _sql = "SELECT * FROM microbe_records WHERE plantingDate = ? AND treatmentGroup = ? ORDER BY createdAt DESC, id DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
     _statement.bindString(_argIndex, plantingDate);
@@ -583,6 +623,69 @@ public final class RecordDao_Impl implements RecordDao {
     _statement.bindString(_argIndex, group);
     _argIndex = 2;
     _statement.bindLong(_argIndex, beforeTime);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<RecordEntity>() {
+      @Override
+      @Nullable
+      public RecordEntity call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfPlantingDate = CursorUtil.getColumnIndexOrThrow(_cursor, "plantingDate");
+          final int _cursorIndexOfTreatmentGroup = CursorUtil.getColumnIndexOrThrow(_cursor, "treatmentGroup");
+          final int _cursorIndexOfObservationResult = CursorUtil.getColumnIndexOrThrow(_cursor, "observationResult");
+          final int _cursorIndexOfNotes = CursorUtil.getColumnIndexOrThrow(_cursor, "notes");
+          final int _cursorIndexOfPhotoPaths = CursorUtil.getColumnIndexOrThrow(_cursor, "photoPaths");
+          final int _cursorIndexOfAudioPath = CursorUtil.getColumnIndexOrThrow(_cursor, "audioPath");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "createdAt");
+          final int _cursorIndexOfUpdatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "updatedAt");
+          final RecordEntity _result;
+          if (_cursor.moveToFirst()) {
+            final long _tmpId;
+            _tmpId = _cursor.getLong(_cursorIndexOfId);
+            final String _tmpPlantingDate;
+            _tmpPlantingDate = _cursor.getString(_cursorIndexOfPlantingDate);
+            final String _tmpTreatmentGroup;
+            _tmpTreatmentGroup = _cursor.getString(_cursorIndexOfTreatmentGroup);
+            final String _tmpObservationResult;
+            _tmpObservationResult = _cursor.getString(_cursorIndexOfObservationResult);
+            final String _tmpNotes;
+            _tmpNotes = _cursor.getString(_cursorIndexOfNotes);
+            final String _tmpPhotoPaths;
+            _tmpPhotoPaths = _cursor.getString(_cursorIndexOfPhotoPaths);
+            final String _tmpAudioPath;
+            _tmpAudioPath = _cursor.getString(_cursorIndexOfAudioPath);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            final long _tmpUpdatedAt;
+            _tmpUpdatedAt = _cursor.getLong(_cursorIndexOfUpdatedAt);
+            _result = new RecordEntity(_tmpId,_tmpPlantingDate,_tmpTreatmentGroup,_tmpObservationResult,_tmpNotes,_tmpPhotoPaths,_tmpAudioPath,_tmpCreatedAt,_tmpUpdatedAt);
+          } else {
+            _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getLatestByPlantingAndGroupBefore(final String plantingDate, final String group,
+      final long beforeTime, final long excludeId,
+      final Continuation<? super RecordEntity> $completion) {
+    final String _sql = "SELECT * FROM microbe_records WHERE plantingDate = ? AND treatmentGroup = ? AND createdAt < ? AND id != ? ORDER BY createdAt DESC LIMIT 1";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 4);
+    int _argIndex = 1;
+    _statement.bindString(_argIndex, plantingDate);
+    _argIndex = 2;
+    _statement.bindString(_argIndex, group);
+    _argIndex = 3;
+    _statement.bindLong(_argIndex, beforeTime);
+    _argIndex = 4;
+    _statement.bindLong(_argIndex, excludeId);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
     return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<RecordEntity>() {
       @Override

@@ -8,10 +8,6 @@
         "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\fragment_manage.xml"
     },
     {
-        "merged": "com.microbe.recorder.app-mergeDebugResources-45:/layout/activity_treatment_group_manage.xml",
-        "source": "com.microbe.recorder.app-main-48:/layout/activity_treatment_group_manage.xml"
-    },
-    {
         "merged": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-mergeDebugResources-45:\\layout\\activity_main.xml",
         "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\activity_main.xml"
     },
@@ -44,16 +40,20 @@
         "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\item_image_viewer.xml"
     },
     {
+        "merged": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-mergeDebugResources-45:\\layout\\activity_add_treatment_group.xml",
+        "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\activity_add_treatment_group.xml"
+    },
+    {
+        "merged": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-mergeDebugResources-45:\\layout\\activity_camera.xml",
+        "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\activity_camera.xml"
+    },
+    {
         "merged": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-mergeDebugResources-45:\\layout\\item_record.xml",
         "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\item_record.xml"
     },
     {
         "merged": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-mergeDebugResources-45:\\layout\\item_sample_type.xml",
         "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\item_sample_type.xml"
-    },
-    {
-        "merged": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-mergeDebugResources-45:\\layout\\activity_sample_manage.xml",
-        "source": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-main-48:\\layout\\activity_sample_manage.xml"
     },
     {
         "merged": "C:\\Users\\m\\.gradle\\daemon\\8.0\\com.microbe.recorder.app-mergeDebugResources-45:\\layout\\fragment_export.xml",

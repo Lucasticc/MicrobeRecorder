@@ -8,9 +8,8 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,14 +17,23 @@ import com.google.android.material.button.MaterialButton
 import com.microbe.recorder.adapter.RecordAdapter
 import com.microbe.recorder.database.AppDatabase
 import com.microbe.recorder.database.RecordEntity
+import com.microbe.recorder.util.HistoryHelper
+import com.microbe.recorder.viewmodel.HistoryViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * 历史记录列表页面
+ *
+ * 使用 ViewModel 保留搜索关键词和选择模式状态，横竖屏旋转时不会丢失。
+ */
 class HistoryActivity : AppCompatActivity() {
 
     private lateinit var database: AppDatabase
+    private lateinit var historyHelper: HistoryHelper
     private lateinit var recordAdapter: RecordAdapter
+    private lateinit var viewModel: HistoryViewModel
 
     private lateinit var etSearch: EditText
     private lateinit var ivClearSearch: ImageView
@@ -46,10 +54,31 @@ class HistoryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_history)
 
         database = AppDatabase.getDatabase(this)
+        historyHelper = HistoryHelper(this, database)
+        viewModel = ViewModelProvider(this)[HistoryViewModel::class.java]
+
         initViews()
         setupRecyclerView()
         setupSearch()
         loadAllRecords()
+
+        // 迁移 onBackPressed → OnBackPressedCallback
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (recordAdapter.isInSelectionMode()) {
+                    exitSelectionMode()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+
+        // 从 ViewModel 恢复搜索关键词
+        val savedKeyword = viewModel.searchKeyword.value ?: ""
+        if (savedKeyword.isNotEmpty()) {
+            etSearch.setText(savedKeyword)
+        }
     }
 
     private fun initViews() {
@@ -107,44 +136,29 @@ class HistoryActivity : AppCompatActivity() {
         recordAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {})
     }
 
-    // 长按列表项进入选择模式（在 item 布局中通过 itemView 的 longClick 处理）
-    // 这里改为：点击工具栏的「选择」按钮进入
-
     private fun enterSelectionMode() {
         recordAdapter.setSelectionMode(true)
+        viewModel.isInSelectionMode.value = true
         batchBar.visibility = View.VISIBLE
         tvSelectCount.text = "已选 0 条"
     }
 
     private fun exitSelectionMode() {
         recordAdapter.setSelectionMode(false)
+        viewModel.isInSelectionMode.value = false
         batchBar.visibility = View.GONE
     }
 
     private fun batchDelete() {
         val selectedIds = recordAdapter.getSelectedIds()
-        if (selectedIds.isEmpty()) {
-            Toast.makeText(this, "请先选择要删除的记录", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("批量删除")
-            .setMessage("确定要删除选中的 ${selectedIds.size} 条记录吗？此操作不可撤销。")
-            .setPositiveButton("删除") { _, _ ->
-                lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
-                        selectedIds.forEach { id ->
-                            database.recordDao().deleteById(id)
-                        }
-                    }
-                    Toast.makeText(this@HistoryActivity, "已删除 ${selectedIds.size} 条记录", Toast.LENGTH_SHORT).show()
+        historyHelper.showBatchDeleteDialog(selectedIds) { ids ->
+            lifecycleScope.launch {
+                historyHelper.batchDelete(ids) {
                     exitSelectionMode()
                     loadAllRecords()
                 }
             }
-            .setNegativeButton("取消", null)
-            .show()
+        }
     }
 
     private fun setupSearch() {
@@ -152,7 +166,8 @@ class HistoryActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val keyword = s.toString().trim()
-                if (keyword.isEmpty()) showAllRecords() else searchRecords(keyword)
+                viewModel.searchKeyword.value = keyword
+                updateUI(historyHelper.filterRecords(allRecords, keyword))
                 ivClearSearch.visibility = if (keyword.isEmpty()) View.GONE else View.VISIBLE
             }
             override fun afterTextChanged(s: Editable?) {}
@@ -163,19 +178,11 @@ class HistoryActivity : AppCompatActivity() {
     private fun loadAllRecords() {
         lifecycleScope.launch {
             allRecords = withContext(Dispatchers.IO) { database.recordDao().getAllRecords() }
-            withContext(Dispatchers.Main) { updateUI(allRecords) }
+            withContext(Dispatchers.Main) {
+                val keyword = viewModel.searchKeyword.value ?: ""
+                updateUI(historyHelper.filterRecords(allRecords, keyword))
+            }
         }
-    }
-
-    private fun showAllRecords() { updateUI(allRecords) }
-
-    private fun searchRecords(keyword: String) {
-        val filtered = allRecords.filter {
-            it.plantingDate.contains(keyword, ignoreCase = true) ||
-                    it.treatmentGroup.contains(keyword, ignoreCase = true) ||
-                    it.observationResult.contains(keyword, ignoreCase = true)
-        }
-        updateUI(filtered)
     }
 
     private fun updateUI(records: List<RecordEntity>) {
@@ -193,14 +200,9 @@ class HistoryActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadAllRecords()
-    }
-
-    override fun onBackPressed() {
-        if (recordAdapter.isInSelectionMode()) {
-            exitSelectionMode()
-        } else {
-            super.onBackPressed()
+        if (HistoryViewModel.needsRefresh) {
+            HistoryViewModel.needsRefresh = false
+            loadAllRecords()
         }
     }
 }

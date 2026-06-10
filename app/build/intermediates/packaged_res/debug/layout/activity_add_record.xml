@@ -81,8 +81,9 @@
         android:layout_height="0dp"
         android:fillViewport="true"
         android:overScrollMode="never"
+        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/cardFilterBar"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnSave"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -93,7 +94,7 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:paddingTop="8dp"
-            android:paddingBottom="20dp">
+            android:paddingBottom="80dp">
 
             <!-- 种植信息 -->
             <com.google.android.material.card.MaterialCardView
@@ -521,22 +522,26 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 保存按钮 -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSave"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="32dp"
-                android:text="✅ 保存记录"
-                android:textSize="17sp"
-                android:textStyle="bold"
-                app:cornerRadius="14dp"
-                app:backgroundTint="@color/primary"
-                app:elevation="6dp" />
-
         </LinearLayout>
 
     </ScrollView>
+
+    <!-- 保存按钮：固定浮动在页面底部，滚动时始终可见 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSave"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="✅ 保存记录"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        app:cornerRadius="14dp"
+        app:backgroundTint="@color/primary"
+        app:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

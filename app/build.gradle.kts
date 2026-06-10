@@ -12,8 +12,8 @@ android {
         applicationId = "com.microbe.recorder"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 17
+        versionName = "1.4.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -82,18 +82,21 @@ dependencies {
     implementation("org.apache.xmlbeans:xmlbeans:5.2.0")
     implementation("org.apache.commons:commons-compress:1.24.0")
 
-    // ViewPager2
-    implementation("androidx.viewpager2:viewpager2:1.0.0")
-
     // CameraX
     implementation("androidx.camera:camera-core:1.3.0")
     implementation("androidx.camera:camera-camera2:1.3.0")
     implementation("androidx.camera:camera-lifecycle:1.3.0")
     implementation("androidx.camera:camera-view:1.3.0")
 
+    // ViewPager2
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+
     // Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
     ksp("com.github.bumptech.glide:ksp:4.16.0")
+
+    // PhotoView for zoom
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

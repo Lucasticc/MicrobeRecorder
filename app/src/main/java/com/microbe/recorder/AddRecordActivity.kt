@@ -4,11 +4,13 @@ import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import androidx.appcompat.app.AlertDialog
 import android.os.Looper
 import android.speech.RecognizerIntent
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -18,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,6 +33,8 @@ import com.microbe.recorder.database.TreatmentGroupEntity
 import com.microbe.recorder.util.AudioRecorderHelper
 import com.microbe.recorder.util.CameraHelper
 import com.microbe.recorder.util.FileHelper
+import com.microbe.recorder.viewmodel.AddRecordViewModel
+import com.microbe.recorder.viewmodel.HistoryViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,11 +44,20 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+/**
+ * 实验记录新增/编辑页面
+ *
+ * 使用 ViewModel + LiveData 托管表单数据，横竖屏旋转时：
+ * - ViewModel 不会被销毁，表单填写内容完整保留
+ * - 照片列表、录音路径、编辑模式状态跨配置变更留存
+ * - 原有数据库存取逻辑不变，仅优化页面临时数据生命周期
+ */
 class AddRecordActivity : AppCompatActivity() {
 
     private lateinit var database: AppDatabase
     private lateinit var photoAdapter: PhotoAdapter
     private lateinit var audioRecorderHelper: AudioRecorderHelper
+    private lateinit var viewModel: AddRecordViewModel
 
     private lateinit var etPlantingDate: TextInputEditText
     private lateinit var etCreationDate: TextInputEditText
@@ -64,15 +78,25 @@ class AddRecordActivity : AppCompatActivity() {
     private lateinit var cardYesterdayRef: View
     private lateinit var tvYesterdayRef: TextView
     private lateinit var rvYesterdayPhotos: RecyclerView
+    private var refAdapter: PhotoAdapter? = null
 
-    private var isRecording = false
-    private var currentAudioPath: String? = null
-    private val photoPaths = mutableListOf<String>()
-    private var editRecordId: Long = -1
-    private var isEditMode = false
-
-    // 记录日期（可修改）
-    private var creationCalendar = Calendar.getInstance()
+    // 便捷访问 ViewModel 数据（保持与原代码一致的变量名）
+    private val photoPaths get() = viewModel.photoPaths.value!!
+    private var isRecording
+        get() = false // 录音状态不跨旋转保留（录音器会随 Activity 销毁而停止）
+        set(_) {}
+    private var currentAudioPath: String?
+        get() = viewModel.audioPath.value
+        set(value) { viewModel.audioPath.value = value }
+    private var editRecordId: Long
+        get() = viewModel.editRecordId.value ?: -1
+        set(value) { viewModel.editRecordId.value = value }
+    private var isEditMode: Boolean
+        get() = viewModel.isEditMode.value ?: false
+        set(value) { viewModel.isEditMode.value = value }
+    private var creationCalendar: Calendar
+        get() = Calendar.getInstance().apply { timeInMillis = viewModel.creationTimestamp.value ?: System.currentTimeMillis() }
+        set(value) { viewModel.creationTimestamp.value = value.timeInMillis }
 
     private val handler = Handler(Looper.getMainLooper())
     private var recordingStartTime = 0L
@@ -93,39 +117,70 @@ class AddRecordActivity : AppCompatActivity() {
         } else ""
     }
 
-    private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+    // 自定义相机（支持缩放）
+    private val cameraActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         try {
-            if (success) {
-                val path = CameraHelper.getCurrentPhotoPath()
-                if (path != null && File(path).exists() && photoPaths.size < 5) {
-                    photoPaths.add(path)
-                    photoAdapter.addPhoto(path)
+            if (result.resultCode == RESULT_OK) {
+                val photoPath = result.data?.getStringExtra(CameraActivity.EXTRA_PHOTO_PATH)
+                if (photoPath != null && File(photoPath).exists() && photoPaths.size < 5) {
+                    // CameraActivity 已直接保存到 getExternalFilesDir，不需要复制
+                    photoPaths.add(photoPath)
+                    photoAdapter.addPhoto(photoPath)
                     updatePhotoCount()
                 }
             }
         } catch (e: Exception) { e.printStackTrace() }
-        finally { CameraHelper.clearCurrentPhoto() }
     }
 
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    // 多选图片
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         try {
-            if (uri != null && photoPaths.size < 5) {
-                val folder = getPhotoFolder()
-                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                val imagesRoot = File(getExternalFilesDir(null), "images")
-                val storageDir = if (folder.isNotEmpty()) File(imagesRoot, folder) else imagesRoot
-                if (!storageDir.exists()) storageDir.mkdirs()
-                val destFile = File(storageDir, "PICK_${timeStamp}.jpg")
-                contentResolver.openInputStream(uri)?.use { input -> destFile.outputStream().use { output -> input.copyTo(output) } }
-                if (destFile.exists()) {
-                    photoPaths.add(destFile.absolutePath)
-                    photoAdapter.addPhoto(destFile.absolutePath)
-                    updatePhotoCount()
+            if (!uris.isNullOrEmpty()) {
+                lifecycleScope.launch {
+                    val addedPaths = withContext(Dispatchers.IO) {
+                        val folder = getPhotoFolder()
+                        val imagesRoot = File(getExternalFilesDir(null), "images")
+                        val storageDir = if (folder.isNotEmpty()) File(imagesRoot, folder) else imagesRoot
+                        if (!storageDir.exists()) storageDir.mkdirs()
+
+                        val result = mutableListOf<String>()
+                        var added = 0
+                        for (uri in uris) {
+                            if (photoPaths.size + added >= 5) break
+                            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(Date())
+                            val destFile = File(storageDir, "PICK_${timeStamp}_${added}.jpg")
+                            contentResolver.openInputStream(uri)?.use { input -> destFile.outputStream().use { output -> input.copyTo(output) } }
+                            if (destFile.exists()) {
+                                result.add(destFile.absolutePath)
+                                added++
+                            }
+                        }
+                        result
+                    }
+                    withContext(Dispatchers.Main) {
+                        for (path in addedPaths) {
+                            photoPaths.add(path)
+                            photoAdapter.addPhoto(path)
+                        }
+                        updatePhotoCount()
+                        if (uris.size > 5) Toast.makeText(this@AddRecordActivity, "最多5张照片，已选择前5张", Toast.LENGTH_SHORT).show()
+                    }
                 }
-            } else if (photoPaths.size >= 5) {
-                Toast.makeText(this, "最多5张照片", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    // 图片查看器返回（删除后更新）
+    private val imageViewerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val updated = result.data?.getStringArrayListExtra("updated_photos")
+            if (updated != null) {
+                photoPaths.clear()
+                photoPaths.addAll(updated)
+                photoAdapter.updatePhotos(photoPaths)
+                updatePhotoCount()
+            }
+        }
     }
 
     private val voiceRecognitionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -157,32 +212,125 @@ class AddRecordActivity : AppCompatActivity() {
         database = AppDatabase.getDatabase(this)
         audioRecorderHelper = AudioRecorderHelper(this)
 
-        if (savedInstanceState != null) {
-            savedInstanceState.getStringArrayList("photo_paths")?.let { photoPaths.addAll(it) }
-            currentAudioPath = savedInstanceState.getString("audio_path")
-        }
+        // 获取 ViewModel（跨旋转保留数据）
+        viewModel = ViewModelProvider(this)[AddRecordViewModel::class.java]
 
-        editRecordId = intent.getLongExtra("record_id", -1)
-        isEditMode = editRecordId > 0
+        // 从 Intent 获取编辑模式参数（Intent 在旋转时保留）
+        if (viewModel.editRecordId.value == -1L) {
+            editRecordId = intent.getLongExtra("record_id", -1)
+            isEditMode = editRecordId > 0
+        }
 
         initViews()
         setupPhotoRecyclerView()
         setupClickListeners()
+        setupTextWatchers()
+        restoreStateFromViewModel()
         loadFilterDates()
         loadTreatmentGroups()
 
-        if (isEditMode) loadRecordForEdit()
-        else if (savedInstanceState == null) {
+        if (isEditMode && savedInstanceState == null) loadRecordForEdit()
+
+        // 迁移 onBackPressed → OnBackPressedCallback
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (hasUnsavedInput()) {
+                    AlertDialog.Builder(this@AddRecordActivity)
+                        .setTitle("放弃记录？")
+                        .setMessage("当前有未保存的内容，确定要退出吗？")
+                        .setPositiveButton("退出") { _, _ ->
+                            isEnabled = false
+                            onBackPressedDispatcher.onBackPressed()
+                        }
+                        .setNegativeButton("继续编辑", null)
+                        .show()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+    }
+
+    /**
+     * 从 ViewModel 恢复表单状态到 UI 控件
+     * 横竖屏旋转后，ViewModel 数据仍在，重新填充到重建的 View 中
+     */
+    private fun restoreStateFromViewModel() {
+        viewModel.plantingDate.value?.let { if (it.isNotEmpty()) etPlantingDate.setText(it) }
+        viewModel.creationDate.value?.let { if (it.isNotEmpty()) etCreationDate.setText(it) }
+        viewModel.treatmentGroup.value?.let { if (it.isNotEmpty()) actvTreatmentGroup.setText(it) }
+        viewModel.filterDate.value?.let { if (it.isNotEmpty()) actvFilterDate.setText(it) }
+        viewModel.observation.value?.let { if (it.isNotEmpty()) etObservation.setText(it) }
+        viewModel.notes.value?.let { if (it.isNotEmpty()) etNotes.setText(it) }
+
+        // 恢复照片列表
+        viewModel.photoPaths.value?.let { paths ->
+            if (paths.isNotEmpty()) {
+                photoAdapter.updatePhotos(paths)
+                updatePhotoCount()
+            }
+        }
+
+        // 恢复录音状态
+        viewModel.audioPath.value?.let { path ->
+            if (File(path).exists()) {
+                tvAudioInfo.visibility = View.VISIBLE
+                tvAudioInfo.text = "已有录音: ${File(path).name}"
+            }
+        }
+
+        // 非编辑模式且首次进入时，设置默认日期
+        if (!isEditMode && viewModel.plantingDate.value.isNullOrEmpty()) {
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
             etPlantingDate.setText(today)
             etCreationDate.setText(today)
+            viewModel.plantingDate.value = today
+            viewModel.creationDate.value = today
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putStringArrayList("photo_paths", ArrayList(photoPaths))
-        outState.putString("audio_path", currentAudioPath)
+    /**
+     * 添加 TextWatcher 监听输入变化，实时同步到 ViewModel
+     * 确保旋转后 ViewModel 中的数据是最新的
+     */
+    private fun setupTextWatchers() {
+        etPlantingDate.addTextChangedListener(object : SimpleTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.plantingDate.value = s?.toString() ?: ""
+            }
+        })
+        etCreationDate.addTextChangedListener(object : SimpleTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.creationDate.value = s?.toString() ?: ""
+            }
+        })
+        actvTreatmentGroup.addTextChangedListener(object : SimpleTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.treatmentGroup.value = s?.toString() ?: ""
+            }
+        })
+        actvFilterDate.addTextChangedListener(object : SimpleTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.filterDate.value = s?.toString() ?: ""
+            }
+        })
+        etObservation.addTextChangedListener(object : SimpleTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.observation.value = s?.toString() ?: ""
+            }
+        })
+        etNotes.addTextChangedListener(object : SimpleTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.notes.value = s?.toString() ?: ""
+            }
+        })
+    }
+
+    /** TextWatcher 简化基类，只重写 afterTextChanged */
+    private abstract class SimpleTextWatcher : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
     }
 
     private fun initViews() {
@@ -213,7 +361,7 @@ class AddRecordActivity : AppCompatActivity() {
 
         // 种植日期选择器
         etPlantingDate.setOnClickListener {
-            val cal = Calendar.getInstance()
+            val cal = creationCalendar
             DatePickerDialog(this, { _, year, month, day ->
                 val dateStr = String.format("%04d-%02d-%02d", year, month + 1, day)
                 etPlantingDate.setText(dateStr)
@@ -225,12 +373,13 @@ class AddRecordActivity : AppCompatActivity() {
 
         // 记录日期选择器（默认今天，可修改）
         etCreationDate.setOnClickListener {
+            val cal = creationCalendar
             DatePickerDialog(this, { _, year, month, day ->
                 val dateStr = String.format("%04d-%02d-%02d", year, month + 1, day)
                 etCreationDate.setText(dateStr)
-                creationCalendar.set(year, month, day)
+                creationCalendar = Calendar.getInstance().apply { set(year, month, day) }
                 loadLastReference() // 记录日期变化时刷新参照
-            }, creationCalendar.get(Calendar.YEAR), creationCalendar.get(Calendar.MONTH), creationCalendar.get(Calendar.DAY_OF_MONTH)).show()
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
         // 顶部筛选下拉框 - 选择已有的种植日期
@@ -296,17 +445,19 @@ class AddRecordActivity : AppCompatActivity() {
     }
 
     /**
-     * 加载上次实验参照：同一处理组在记录日期之前最近的一条记录
+     * 加载上次实验参照：同一实验（同一种植日期 + 同一处理组）在记录日期之前最近的一条记录
      */
     private fun loadLastReference() {
         val group = actvTreatmentGroup.text.toString().trim()
-        if (group.isEmpty()) { cardYesterdayRef.visibility = View.GONE; return }
+        val planting = etPlantingDate.text.toString().trim()
+        if (group.isEmpty() || planting.isEmpty()) { cardYesterdayRef.visibility = View.GONE; return }
 
         // 用当前记录日期的 23:59:59 作为上界，找之前最近的一条
         val beforeTime = creationCalendar.timeInMillis + 24 * 60 * 60 * 1000 - 1
+        val excludeId = if (isEditMode) editRecordId else -1L
 
         lifecycleScope.launch {
-            val record = withContext(Dispatchers.IO) { database.recordDao().getLatestByTreatmentGroupBefore(group, beforeTime) }
+            val record = withContext(Dispatchers.IO) { database.recordDao().getLatestByPlantingAndGroupBefore(planting, group, beforeTime, excludeId) }
 
             withContext(Dispatchers.Main) {
                 if (record != null) {
@@ -316,9 +467,20 @@ class AddRecordActivity : AppCompatActivity() {
 
                     if (record.photoPaths.isNotEmpty()) {
                         val paths = record.photoPaths.split(",")
-                        val refAdapter = PhotoAdapter(photos = paths.toMutableList(), isEditable = false)
-                        rvYesterdayPhotos.layoutManager = LinearLayoutManager(this@AddRecordActivity, LinearLayoutManager.HORIZONTAL, false)
-                        rvYesterdayPhotos.adapter = refAdapter
+                        if (refAdapter == null) {
+                            refAdapter = PhotoAdapter(photos = paths.toMutableList(), isEditable = false,
+                                onPhotoClick = { pos ->
+                                    val intent = Intent(this@AddRecordActivity, ImageViewerActivity::class.java)
+                                    intent.putStringArrayListExtra("photos", ArrayList(paths))
+                                    intent.putExtra("position", pos)
+                                    intent.putExtra("isEditable", false)
+                                    startActivity(intent)
+                                })
+                            rvYesterdayPhotos.layoutManager = LinearLayoutManager(this@AddRecordActivity, LinearLayoutManager.HORIZONTAL, false)
+                            rvYesterdayPhotos.adapter = refAdapter
+                        } else {
+                            refAdapter!!.updatePhotos(paths)
+                        }
                         rvYesterdayPhotos.visibility = View.VISIBLE
                     } else {
                         rvYesterdayPhotos.visibility = View.GONE
@@ -349,7 +511,7 @@ class AddRecordActivity : AppCompatActivity() {
                     if (record.photoPaths.isNotEmpty()) {
                         photoPaths.clear()
                         photoPaths.addAll(record.photoPaths.split(","))
-                        photoAdapter.notifyDataSetChanged()
+                        photoAdapter.updatePhotos(photoPaths)
                         updatePhotoCount()
                     }
                     if (record.audioPath.isNotEmpty()) {
@@ -372,6 +534,13 @@ class AddRecordActivity : AppCompatActivity() {
                 photoPaths.removeAt(position)
                 updatePhotoCount()
             },
+            onPhotoClick = { position ->
+                val intent = Intent(this, ImageViewerActivity::class.java)
+                intent.putStringArrayListExtra("photos", ArrayList(photoPaths))
+                intent.putExtra("position", position)
+                intent.putExtra("isEditable", true)
+                imageViewerLauncher.launch(intent)
+            },
             isEditable = true
         )
         rvPhotos.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -381,7 +550,7 @@ class AddRecordActivity : AppCompatActivity() {
     private fun setupClickListeners() {
         btnVoiceInput.setOnClickListener { startVoiceInput() }
         btnTakePhoto.setOnClickListener { takePhoto() }
-        findViewById<View>(R.id.btnPickImage).setOnClickListener { pickImageLauncher.launch("image/*") }
+        findViewById<View>(R.id.btnPickImage).setOnClickListener { pickImageLauncher.launch(arrayOf("image/*")) }
         btnRecord.setOnClickListener { if (isRecording) stopRecording() else startRecording() }
         btnSave.setOnClickListener { saveRecord() }
     }
@@ -396,42 +565,24 @@ class AddRecordActivity : AppCompatActivity() {
     }
 
     private fun tryVoiceRecognition(isRetry: Boolean) {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh-CN")
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh-CN")
-            putExtra(RecognizerIntent.EXTRA_PROMPT, if (isRetry) "请重新说出" else "请说出观察记录")
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-        }
-
-        val mfr = Build.MANUFACTURER.lowercase()
-        val services = when {
-            mfr.contains("samsung") -> listOf(
-                "com.samsung.android.bixby.agent" to "com.samsung.android.bixby.agent.mainui.voiceinteraction.RecognitionServiceTrampoline",
-                "com.samsung.android.vassistant" to "com.samsung.android.vassistant.service.VoiceRecognitionService"
-            )
-            mfr.contains("meizu") -> listOf(
-                "com.meizu.voiceassistant" to "com.meizu.voiceassistant.speech.RecognitionService"
-            )
-            mfr.contains("xiaomi") || mfr.contains("redmi") -> listOf(
-                "com.miui.voiceassist" to "com.miui.voiceassist.VoiceRecognitionService"
-            )
-            mfr.contains("huawei") || mfr.contains("honor") -> listOf(
-                "com.huawei.vassistant" to "com.huawei.vassistant.service.VoiceRecognitionService"
-            )
-            else -> emptyList()
-        }
-
-        for ((pkg, cls) in services) {
-            try {
-                intent.component = android.content.ComponentName(pkg, cls)
-                voiceRecognitionLauncher.launch(intent)
-                return
-            } catch (_: Exception) { continue }
-        }
-
+        // 优先尝试搜狗语音识别
         try {
-            intent.component = null
+            val sogouIntent = Intent("com.sogou.android.inputmethod.action.VOICE_RECOGNIZE").apply {
+                setPackage("com.sogou.android.inputmethod")
+            }
+            voiceRecognitionLauncher.launch(sogouIntent)
+            return
+        } catch (_: Exception) {}
+
+        // 搜狗不可用，回退到系统语音识别
+        try {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh-CN")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh-CN")
+                putExtra(RecognizerIntent.EXTRA_PROMPT, if (isRetry) "请重新说出" else "请说出观察记录")
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+            }
             voiceRecognitionLauncher.launch(intent)
         } catch (_: Exception) {
             Toast.makeText(this, "语音识别不可用，请手动输入", Toast.LENGTH_LONG).show()
@@ -446,9 +597,9 @@ class AddRecordActivity : AppCompatActivity() {
             return
         }
         try {
-            val folder = getPhotoFolder()
-            val (uri, _) = CameraHelper.createImageFile(this, folder)
-            takePictureLauncher.launch(uri)
+            // 启动自定义相机（支持缩放）
+            val intent = Intent(this, CameraActivity::class.java)
+            cameraActivityLauncher.launch(intent)
         } catch (e: Exception) { Toast.makeText(this, "无法启动相机", Toast.LENGTH_SHORT).show() }
     }
 
@@ -460,7 +611,7 @@ class AddRecordActivity : AppCompatActivity() {
         }
         val audioPath = audioRecorderHelper.startRecording()
         if (audioPath != null) {
-            isRecording = true; currentAudioPath = audioPath
+            currentAudioPath = audioPath
             btnRecord.text = "⏹ 停止录音"; layoutRecording.visibility = View.VISIBLE
             recordingStartTime = System.currentTimeMillis(); handler.post(recordingTimerRunnable)
         }
@@ -468,7 +619,7 @@ class AddRecordActivity : AppCompatActivity() {
 
     private fun stopRecording() {
         audioRecorderHelper.stopRecording()
-        isRecording = false; btnRecord.text = "🎙️ 开始录音"; layoutRecording.visibility = View.GONE
+        btnRecord.text = "🎙️ 开始录音"; layoutRecording.visibility = View.GONE
         handler.removeCallbacks(recordingTimerRunnable)
         if (currentAudioPath != null) {
             tvAudioInfo.visibility = View.VISIBLE
@@ -515,6 +666,7 @@ class AddRecordActivity : AppCompatActivity() {
                     )
                     withContext(Dispatchers.IO) { database.recordDao().update(updated) }
                     Toast.makeText(this@AddRecordActivity, "已更新", Toast.LENGTH_SHORT).show()
+                    HistoryViewModel.needsRefresh = true
                     finish()
                 }
             } else {
@@ -527,16 +679,25 @@ class AddRecordActivity : AppCompatActivity() {
                 val id = withContext(Dispatchers.IO) { database.recordDao().insert(record) }
                 if (id > 0) {
                     Toast.makeText(this@AddRecordActivity, "保存成功", Toast.LENGTH_SHORT).show()
+                    HistoryViewModel.needsRefresh = true
                     finish()
                 }
             }
         }
     }
 
+    private fun hasUnsavedInput(): Boolean {
+        // 种植日期和记录日期是系统默认填写的，不算用户输入
+        if (actvTreatmentGroup.text?.isNotBlank() == true) return true
+        if (etObservation.text?.isNotBlank() == true) return true
+        if (etNotes.text?.isNotBlank() == true) return true
+        if (photoPaths.isNotEmpty()) return true
+        if (currentAudioPath != null) return true
+        return false
+    }
+
     override fun onResume() {
         super.onResume()
-        loadFilterDates()
-        loadTreatmentGroups()
     }
 
     override fun onDestroy() {

@@ -1,8 +1,8 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="com.microbe.recorder"
-4    android:versionCode="1"
-5    android:versionName="1.0" >
+4    android:versionCode="17"
+5    android:versionName="1.4.3" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="26"
@@ -73,7 +73,7 @@
 45-->[androidx.core:core:1.12.0] C:\Users\m\.gradle\caches\transforms-3\14ee38d3f5291c179802176f5a6623c9\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
 46
 47    <application
-47-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:30:5-88:19
+47-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:30:5-94:19
 48        android:allowBackup="true"
 48-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:31:9-35
 49        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
@@ -92,177 +92,186 @@
 56-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:36:9-54
 57        android:supportsRtl="true"
 57-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:37:9-35
-58        android:testOnly="true"
-59        android:theme="@style/Theme.MicrobeRecorder" >
-59-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:38:9-53
-60        <activity
-60-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:41:9-48:20
-61            android:name="com.microbe.recorder.MainActivity"
-61-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:42:13-41
-62            android:exported="true" >
-62-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:43:13-36
-63            <intent-filter>
-63-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:44:13-47:29
-64                <action android:name="android.intent.action.MAIN" />
-64-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:45:17-69
-64-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:45:25-66
-65
-66                <category android:name="android.intent.category.LAUNCHER" />
-66-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:46:17-77
-66-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:46:27-74
-67            </intent-filter>
-68        </activity>
-69        <activity
-69-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:50:9-53:58
-70            android:name="com.microbe.recorder.AddRecordActivity"
-70-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:51:13-46
-71            android:exported="false"
-71-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:52:13-37
-72            android:windowSoftInputMode="adjustResize" />
-72-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:53:13-55
-73        <activity
-73-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:55:9-57:40
-74            android:name="com.microbe.recorder.RecordDetailActivity"
-74-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:56:13-49
-75            android:exported="false" />
-75-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:57:13-37
-76        <activity
-76-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:59:9-61:40
-77            android:name="com.microbe.recorder.HistoryActivity"
-77-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:60:13-44
-78            android:exported="false" />
-78-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:61:13-37
-79        <activity
-79-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:63:9-65:40
-80            android:name="com.microbe.recorder.SampleManageActivity"
-80-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:64:13-49
-81            android:exported="false" />
-81-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:65:13-37
-82        <activity
-82-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:67:9-69:40
-83            android:name="com.microbe.recorder.TreatmentGroupManageActivity"
-83-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:68:13-57
-84            android:exported="false" />
-84-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:69:13-37
-85        <activity
-85-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:71:9-75:60
-86            android:name="com.microbe.recorder.ImageViewerActivity"
-86-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:72:13-48
-87            android:configChanges="orientation|screenSize"
-87-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:74:13-59
-88            android:exported="false"
-88-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:73:13-37
-89            android:theme="@style/Theme.MicrobeRecorder" />
-89-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:75:13-57
-90
-91        <!-- FileProvider for camera -->
-92        <provider
-93            android:name="androidx.core.content.FileProvider"
-93-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:79:13-62
-94            android:authorities="com.microbe.recorder.fileprovider"
-94-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:80:13-64
-95            android:exported="false"
-95-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:81:13-37
-96            android:grantUriPermissions="true" >
-96-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:82:13-47
-97            <meta-data
-97-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:83:13-85:54
-98                android:name="android.support.FILE_PROVIDER_PATHS"
-98-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:84:17-67
-99                android:resource="@xml/file_paths" />
-99-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:85:17-51
-100        </provider>
-101
-102        <service
-102-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:24:9-33:19
-103            android:name="androidx.camera.core.impl.MetadataHolderService"
-103-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:25:13-75
-104            android:enabled="false"
-104-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:26:13-36
-105            android:exported="false" >
-105-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:27:13-37
-106            <meta-data
-106-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:30:13-32:89
-107                android:name="androidx.camera.core.impl.MetadataHolderService.DEFAULT_CONFIG_PROVIDER"
-107-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:31:17-103
-108                android:value="androidx.camera.camera2.Camera2Config$DefaultProvider" />
-108-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:32:17-86
-109        </service>
-110
-111        <provider
-111-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
-112            android:name="androidx.startup.InitializationProvider"
-112-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
-113            android:authorities="com.microbe.recorder.androidx-startup"
-113-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
-114            android:exported="false" >
-114-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
-115            <meta-data
-115-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
-116                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-116-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
-117                android:value="androidx.startup" />
-117-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
-118            <meta-data
-118-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\m\.gradle\caches\transforms-3\8e33cced5a2e19fa8ebb8fc987642ebf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
-119                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-119-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\m\.gradle\caches\transforms-3\8e33cced5a2e19fa8ebb8fc987642ebf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
-120                android:value="androidx.startup" />
-120-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\m\.gradle\caches\transforms-3\8e33cced5a2e19fa8ebb8fc987642ebf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
-121            <meta-data
-121-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
-122                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-122-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
-123                android:value="androidx.startup" />
-123-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
-124        </provider>
-125
-126        <service
-126-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:24:9-28:63
-127            android:name="androidx.room.MultiInstanceInvalidationService"
-127-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:25:13-74
-128            android:directBootAware="true"
-128-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:26:13-43
-129            android:exported="false" />
-129-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:27:13-37
-130
-131        <receiver
-131-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
-132            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-132-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
-133            android:directBootAware="false"
-133-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
-134            android:enabled="true"
-134-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
-135            android:exported="true"
-135-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
-136            android:permission="android.permission.DUMP" >
-136-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
-137            <intent-filter>
-137-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
-138                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-138-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
-138-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
-139            </intent-filter>
-140            <intent-filter>
-140-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
-141                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-141-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
-141-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
-142            </intent-filter>
-143            <intent-filter>
-143-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
-144                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-144-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
-144-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
-145            </intent-filter>
-146            <intent-filter>
-146-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
-147                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-147-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
-147-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
-148            </intent-filter>
-149        </receiver>
-150    </application>
-151
-152</manifest>
+58        android:theme="@style/Theme.MicrobeRecorder" >
+58-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:38:9-53
+59        <activity
+59-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:41:9-48:20
+60            android:name="com.microbe.recorder.MainActivity"
+60-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:42:13-41
+61            android:exported="true" >
+61-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:43:13-36
+62            <intent-filter>
+62-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:44:13-47:29
+63                <action android:name="android.intent.action.MAIN" />
+63-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:45:17-69
+63-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:45:25-66
+64
+65                <category android:name="android.intent.category.LAUNCHER" />
+65-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:46:17-77
+65-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:46:27-74
+66            </intent-filter>
+67        </activity>
+68        <activity
+68-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:50:9-53:58
+69            android:name="com.microbe.recorder.AddRecordActivity"
+69-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:51:13-46
+70            android:exported="false"
+70-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:52:13-37
+71            android:windowSoftInputMode="adjustResize" />
+71-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:53:13-55
+72        <activity
+72-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:55:9-57:40
+73            android:name="com.microbe.recorder.RecordDetailActivity"
+73-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:56:13-49
+74            android:exported="false" />
+74-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:57:13-37
+75        <activity
+75-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:59:9-61:40
+76            android:name="com.microbe.recorder.HistoryActivity"
+76-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:60:13-44
+77            android:exported="false" />
+77-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:61:13-37
+78        <activity
+78-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:63:9-65:40
+79            android:name="com.microbe.recorder.TreatmentGroupManageActivity"
+79-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:64:13-57
+80            android:exported="false" />
+80-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:65:13-37
+81        <activity
+81-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:67:9-69:40
+82            android:name="com.microbe.recorder.AddTreatmentGroupActivity"
+82-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:68:13-54
+83            android:exported="false" />
+83-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:69:13-37
+84        <activity
+84-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:71:9-75:60
+85            android:name="com.microbe.recorder.ImageViewerActivity"
+85-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:72:13-48
+86            android:configChanges="orientation|screenSize"
+86-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:74:13-59
+87            android:exported="false"
+87-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:73:13-37
+88            android:theme="@style/Theme.MicrobeRecorder" />
+88-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:75:13-57
+89        <activity
+89-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:77:9-81:60
+90            android:name="com.microbe.recorder.CameraActivity"
+90-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:78:13-43
+91            android:exported="false"
+91-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:79:13-37
+92            android:screenOrientation="portrait"
+92-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:80:13-49
+93            android:theme="@style/Theme.MicrobeRecorder" />
+93-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:81:13-57
+94
+95        <!-- FileProvider for camera -->
+96        <provider
+97            android:name="androidx.core.content.FileProvider"
+97-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:85:13-62
+98            android:authorities="com.microbe.recorder.fileprovider"
+98-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:86:13-64
+99            android:exported="false"
+99-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:87:13-37
+100            android:grantUriPermissions="true" >
+100-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:88:13-47
+101            <meta-data
+101-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:89:13-91:54
+102                android:name="android.support.FILE_PROVIDER_PATHS"
+102-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:90:17-67
+103                android:resource="@xml/file_paths" />
+103-->D:\MicrobeRecorder\app\src\main\AndroidManifest.xml:91:17-51
+104        </provider>
+105
+106        <service
+106-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:24:9-33:19
+107            android:name="androidx.camera.core.impl.MetadataHolderService"
+107-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:25:13-75
+108            android:enabled="false"
+108-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:26:13-36
+109            android:exported="false" >
+109-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:27:13-37
+110            <meta-data
+110-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:30:13-32:89
+111                android:name="androidx.camera.core.impl.MetadataHolderService.DEFAULT_CONFIG_PROVIDER"
+111-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:31:17-103
+112                android:value="androidx.camera.camera2.Camera2Config$DefaultProvider" />
+112-->[androidx.camera:camera-camera2:1.3.0] C:\Users\m\.gradle\caches\transforms-3\dfedfc8798b6f1c4fed012c279bc8b72\transformed\camera-camera2-1.3.0\AndroidManifest.xml:32:17-86
+113        </service>
+114
+115        <provider
+115-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+116            android:name="androidx.startup.InitializationProvider"
+116-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+117            android:authorities="com.microbe.recorder.androidx-startup"
+117-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+118            android:exported="false" >
+118-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+119            <meta-data
+119-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+120                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+120-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+121                android:value="androidx.startup" />
+121-->[androidx.emoji2:emoji2:1.2.0] C:\Users\m\.gradle\caches\transforms-3\6c5a267e5a1ff8560e27ff81874ff52e\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+122            <meta-data
+122-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\m\.gradle\caches\transforms-3\8e33cced5a2e19fa8ebb8fc987642ebf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+123                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+123-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\m\.gradle\caches\transforms-3\8e33cced5a2e19fa8ebb8fc987642ebf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+124                android:value="androidx.startup" />
+124-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\m\.gradle\caches\transforms-3\8e33cced5a2e19fa8ebb8fc987642ebf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+125            <meta-data
+125-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+126                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+126-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+127                android:value="androidx.startup" />
+127-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+128        </provider>
+129
+130        <service
+130-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:24:9-28:63
+131            android:name="androidx.room.MultiInstanceInvalidationService"
+131-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:25:13-74
+132            android:directBootAware="true"
+132-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:26:13-43
+133            android:exported="false" />
+133-->[androidx.room:room-runtime:2.6.0] C:\Users\m\.gradle\caches\transforms-3\06d46c08e4e27090d7ee5ce781392963\transformed\room-runtime-2.6.0\AndroidManifest.xml:27:13-37
+134
+135        <receiver
+135-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+136            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+136-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+137            android:directBootAware="false"
+137-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+138            android:enabled="true"
+138-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+139            android:exported="true"
+139-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+140            android:permission="android.permission.DUMP" >
+140-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+141            <intent-filter>
+141-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+142                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+142-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+142-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+143            </intent-filter>
+144            <intent-filter>
+144-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+145                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+145-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+145-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+146            </intent-filter>
+147            <intent-filter>
+147-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+148                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+148-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+148-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+149            </intent-filter>
+150            <intent-filter>
+150-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+151                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+151-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+151-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\m\.gradle\caches\transforms-3\887cf7287e1495011737a93dad3e182e\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+152            </intent-filter>
+153        </receiver>
+154    </application>
+155
+156</manifest>

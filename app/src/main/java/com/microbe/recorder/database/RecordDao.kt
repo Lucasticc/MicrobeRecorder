@@ -18,7 +18,7 @@ interface RecordDao {
     @Delete
     suspend fun delete(record: RecordEntity)
 
-    @Query("SELECT * FROM microbe_records ORDER BY createdAt DESC")
+    @Query("SELECT * FROM microbe_records ORDER BY createdAt DESC, id DESC")
     suspend fun getAllRecords(): List<RecordEntity>
 
     @Query("SELECT * FROM microbe_records WHERE id = :id")
@@ -27,13 +27,13 @@ interface RecordDao {
     @Query("DELETE FROM microbe_records WHERE id = :id")
     suspend fun deleteById(id: Long)
 
-    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate ORDER BY createdAt DESC")
+    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate ORDER BY createdAt DESC, id DESC")
     suspend fun getRecordsByPlantingDate(plantingDate: String): List<RecordEntity>
 
-    @Query("SELECT * FROM microbe_records WHERE treatmentGroup = :group ORDER BY createdAt DESC")
+    @Query("SELECT * FROM microbe_records WHERE treatmentGroup = :group ORDER BY createdAt DESC, id DESC")
     suspend fun getRecordsByTreatmentGroup(group: String): List<RecordEntity>
 
-    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate AND treatmentGroup = :group ORDER BY createdAt DESC")
+    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate AND treatmentGroup = :group ORDER BY createdAt DESC, id DESC")
     suspend fun getRecordsByPlantingAndGroup(plantingDate: String, group: String): List<RecordEntity>
 
     @Query("SELECT DISTINCT plantingDate FROM microbe_records ORDER BY plantingDate DESC")
@@ -47,4 +47,10 @@ interface RecordDao {
 
     @Query("SELECT * FROM microbe_records WHERE treatmentGroup = :group AND createdAt < :beforeTime ORDER BY createdAt DESC LIMIT 1")
     suspend fun getLatestByTreatmentGroupBefore(group: String, beforeTime: Long): RecordEntity?
+
+    @Query("SELECT * FROM microbe_records WHERE plantingDate = :plantingDate AND treatmentGroup = :group AND createdAt < :beforeTime AND id != :excludeId ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLatestByPlantingAndGroupBefore(plantingDate: String, group: String, beforeTime: Long, excludeId: Long = -1): RecordEntity?
+
+    @Query("UPDATE microbe_records SET treatmentGroup = :newName WHERE treatmentGroup = :oldName AND plantingDate = :plantingDate")
+    suspend fun updateTreatmentGroup(oldName: String, newName: String, plantingDate: String)
 }
